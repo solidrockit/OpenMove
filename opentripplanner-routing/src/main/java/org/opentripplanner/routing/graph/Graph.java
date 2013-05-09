@@ -111,6 +111,8 @@ public class Graph implements Serializable {
     private VertexComparatorFactory vertexComparatorFactory = new MortonVertexComparatorFactory();
 
     private transient TimeZone timeZone = null;
+    
+    private Map<String, Server> serverList; // servidores vecinos
 
     public Graph(Graph basedOn) {
         this();
@@ -121,8 +123,16 @@ public class Graph implements Serializable {
         this.vertices = new ConcurrentHashMap<String, Vertex>();
         temporaryEdges = Collections.newSetFromMap(new ConcurrentHashMap<Edge, Boolean>());
     }
+    
+    public Map<String, Server> getServerList() {
+		return serverList;
+	}
 
-    /**
+	public void setServerList(Map<String, Server> serverList) {
+		this.serverList = serverList;
+	}
+
+	/**
      * Add the given vertex to the graph.
      * Ideally, only vertices should add themselves to the graph, 
      * when they are constructed or deserialized.
