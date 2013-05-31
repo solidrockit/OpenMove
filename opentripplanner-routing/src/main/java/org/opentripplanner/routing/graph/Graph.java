@@ -112,7 +112,7 @@ public class Graph implements Serializable {
 
     private transient TimeZone timeZone = null;
     
-    private Map<String, Server> serverList; // servidores vecinos
+    private Map<String, Server> serverList; // listado con todos los servidores
 
     public Graph(Graph basedOn) {
         this();

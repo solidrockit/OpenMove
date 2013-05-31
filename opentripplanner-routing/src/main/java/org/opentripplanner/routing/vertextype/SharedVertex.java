@@ -13,16 +13,21 @@
 
 package org.opentripplanner.routing.vertextype;
 
+import java.util.List;
+
 import org.onebusaway.gtfs.model.Stop;
 import org.opentripplanner.routing.core.RoutingRequest;
 import org.opentripplanner.routing.graph.Graph;
 import org.opentripplanner.routing.graph.Server;
+import org.opentripplanner.routing.services.PathService;
 import org.opentripplanner.routing.spt.GraphPath;
 
 public class SharedVertex extends TransitStop {
 
     private String sharedId;
     private Server neighbour;
+    
+    public PathService pathService;
     
 	public SharedVertex(Graph graph, Stop stop) {
 		super(graph, stop);
@@ -53,8 +58,15 @@ public class SharedVertex extends TransitStop {
 
 	public GraphPath sendRequestToNeighbour(RoutingRequest options)
 	{
-		//////////////////////////////IMPLEMENTAR
-		return null;
+		/*  Realiza una nueva llamada al método PLAN del API (recursivo) con otros parametros
+		 *  en RoutingRequest. Concretamente nuevos 'from' o 'to' en RoutingContext.
+		 *  Se llamará aqui desde el algoritmo principal de rutado: devuelvo el nuevo Path.
+		*/
+		
+		//TripPlan plan = planGenerator.generate(options);
+		List<GraphPath> paths = pathService.getPaths(options); //implementado en routing.impl.SimplifiedPathServiceImpl por ejemplo
+		//Devuelvo solo la primera opción de rutado de cara a juntarla luego con el resto de la ruta local
+		return paths.get(0);
 	}
     
 }

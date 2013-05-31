@@ -14,6 +14,7 @@
 package org.opentripplanner.api.ws;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -23,6 +24,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.opentripplanner.api.model.TripPlan;
 import org.opentripplanner.api.model.error.PlannerError;
+import org.opentripplanner.routing.spt.GraphPath;
 
 /** Represents a trip planner response, will be serialized into XML or JSON by Jersey */
 @XmlRootElement
@@ -30,6 +32,7 @@ public class Response {
 
     private HashMap<String, String> requestParameters;
     private TripPlan plan;
+    private List<GraphPath> paths;
     private PlannerError error = null;
 
     public Response() {
@@ -73,6 +76,17 @@ public class Response {
     public void setPlan(TripPlan plan) {
         this.plan = plan;
     }
+    
+    /**
+     * The actual paths of the trip.
+     */
+    public List<GraphPath> getPaths() {
+        return paths;
+    }
+
+	public void setPaths(List<GraphPath> paths) {
+        this.paths = paths;
+	}
 
     /**
      * The error (if any) that this response raised.
