@@ -45,7 +45,7 @@ import com.sun.jersey.api.spring.Autowire;
  * 
  * @throws JSONException
  */
-//AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+
 @Path("/plan") // NOTE - /ws/plan is the full path -- see web.xml
 @XmlRootElement
 @Autowire
