@@ -11,7 +11,7 @@
                     <list>
                         <bean class="org.opentripplanner.graph_builder.model.GtfsBundle">
                         	<!-- Local ZIP file -->
-                            	<property name="path" value="/path/to/local/gtfs.zip" />
+                            	<property name="path" value="/path/to/local/gtfsfile2.zip" />
                             	<property name="defaultBikesAllowed" value="true" />
                         </bean>
                     </list>

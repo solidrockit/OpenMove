@@ -139,8 +139,9 @@ public class GenericAStar implements SPTService { // maybe this should be wrappe
                 // Returning null indicates something went wrong and search should be aborted.
                 // This is distinct from the empty list of paths which implies that a result may still
                 // be found by retrying with altered options (e.g. max walk distance)
-                storeMemory();
-                return null; // throw timeout exception
+                //Commented out by Aitzol
+                //storeMemory();
+                //return null; // throw timeout exception
             }
 
             // get the lowest-weight state in the queue
