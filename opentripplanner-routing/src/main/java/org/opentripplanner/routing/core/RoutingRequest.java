@@ -32,6 +32,7 @@ import org.opentripplanner.common.model.NamedPlace;
 import org.opentripplanner.routing.graph.Graph;
 import org.opentripplanner.routing.graph.Vertex;
 import org.opentripplanner.routing.request.BannedStopSet;
+import org.opentripplanner.routing.vertextype.SharedVertex;
 import org.opentripplanner.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -293,6 +294,12 @@ public class RoutingRequest implements Cloneable, Serializable {
     private AgencyAndId startingTransitStopId;
     private boolean walkingBike;
     
+    //SharedVertex banned nodes for local routing
+    private List<SharedVertex> bannedSharedVertex;
+    //True if the routing search has started in a remote server
+    private boolean delegatedSearch;
+    
+    
     /* CONSTRUCTORS */
     
     /** Constructor for options; modes defaults to walk and transit */
@@ -300,10 +307,14 @@ public class RoutingRequest implements Cloneable, Serializable {
         // http://en.wikipedia.org/wiki/Walking
         walkSpeed = 1.33; // 1.33 m/s ~ 3mph, avg. human speed
         bikeSpeed = 5; // 5 m/s, ~11 mph, a random bicycling speed
-        carSpeed = 15; // 15 m/s, ~35 mph, a random driving speed        
+        carSpeed = 15; // 15 m/s, ~35 mph, a random driving speed
         setModes(new TraverseModeSet(new TraverseMode[] { TraverseMode.WALK, TraverseMode.TRANSIT }));
+        bannedSharedVertex = new ArrayList<SharedVertex>();
+        delegatedSearch = false;
         bikeWalkingOptions = this;
     }
+    
+    
 
     public RoutingRequest(TraverseModeSet modes) {
         this();
@@ -864,5 +875,21 @@ public class RoutingRequest implements Cloneable, Serializable {
 
     public void banTrip(AgencyAndId trip) {
         bannedTrips.put(trip, BannedStopSet.ALL);
+    }
+    
+    public boolean getDelegatedSearch() {
+    	return this.delegatedSearch;
+    }
+    
+    public void setDelegatedSearch(boolean delegatedSearch) {
+    	this.delegatedSearch = delegatedSearch;
+    }
+    
+    public void banSharedVertex(SharedVertex sharedVertex) {
+        this.bannedSharedVertex.add(sharedVertex);
+    }
+    
+    public boolean isSharedVertexBanned(SharedVertex sharedVertex) {
+    	return bannedSharedVertex.contains(sharedVertex);
     }
 }

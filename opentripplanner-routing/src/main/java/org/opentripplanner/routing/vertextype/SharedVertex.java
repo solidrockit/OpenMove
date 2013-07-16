@@ -14,9 +14,14 @@
 package org.opentripplanner.routing.vertextype;
 
 import java.util.List;
+import java.net.URLEncoder;
 
 import org.onebusaway.gtfs.model.Stop;
+import org.opentripplanner.model.TripPlan;
+import org.opentripplanner.routing.core.Request;
+import org.opentripplanner.routing.core.Response;
 import org.opentripplanner.routing.core.RoutingRequest;
+import org.opentripplanner.routing.core.TripRequest;
 import org.opentripplanner.routing.graph.Graph;
 import org.opentripplanner.routing.graph.Server;
 import org.opentripplanner.routing.services.PathService;
@@ -56,17 +61,34 @@ public class SharedVertex extends TransitStop {
 		this.neighbour = neighbour;
 	}
 
-	public GraphPath sendRequestToNeighbour(RoutingRequest options)
+	public TripPlan sendRequestToNeighbour(RoutingRequest options)
 	{
-		/*  Realiza una nueva llamada al método PLAN del API (recursivo) con otros parametros
-		 *  en RoutingRequest. Concretamente nuevos 'from' o 'to' en RoutingContext.
-		 *  Se llamará aqui desde el algoritmo principal de rutado: devuelvo el nuevo Path.
+		/* Makes a new call to the API PLAN (recursive) with other parameters
+		* in RoutingRequest. Specifically new 'from' or 'to' in RoutingContext.
+		* The main routing algorithm (A* Star) will call here: return the resulting Path.
 		*/
 		
-		//TripPlan plan = planGenerator.generate(options);
-		List<GraphPath> paths = pathService.getPaths(options); //implementado en routing.impl.SimplifiedPathServiceImpl por ejemplo
-		//Devuelvo solo la primera opción de rutado de cara a juntarla luego con el resto de la ruta local
-		return paths.get(0);
+		TripRequest remoteTrip = new TripRequest();
+		Request remoteRequest = new Request();
+		Response respuesta = null;
+		
+		//fromPlace=42.835412,-2.670686
+		//&toPlace=42.873857,-2.679784
+		//&optimize=QUICK
+		//&maxWalkDistance=840
+		//&mode=TRANSIT,WALK
+		
+		remoteRequest.setFrom(options.from);
+		remoteRequest.setTo(options.to);		
+		remoteRequest.setOptimize(options.optimize);
+		remoteRequest.setMaxWalkDistance(840.0);
+		remoteRequest.setModes(options.modes);
+		
+		/*remoteRequest.setDateTime(DateFormat.format("MM/dd/yy", System.currentTimeMillis()).toString(), 
+				DateFormat.format("hh:mmaa", System.currentTimeMillis()).toString());*/
+			
+		respuesta = remoteTrip.requestPlan(remoteRequest, neighbour);	
+		return respuesta.getPlan();
 	}
     
 }

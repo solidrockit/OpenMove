@@ -73,7 +73,7 @@ public class Server implements Serializable {
     private String name;
     private String serviceUrl;
     private String url;
-    private Map<String, SharedVertex> sharedVertexList;
+    private Map<String, SharedVertex> sharedVertexList; //vertex id, vertex
     private boolean inMis;
     
 	public Server() {
@@ -150,7 +150,7 @@ public class Server implements Serializable {
 	}
 
 	public boolean isNeighbour() {
-		//si la lista de nodos compartidos contiene elementos -> es servidor vecino
+		//if sharedvertexlist contains nodes -> server is neighbor
 		return sharedVertexList.size() > 0;
 	}
 }

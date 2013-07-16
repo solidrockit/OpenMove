@@ -21,10 +21,15 @@ import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.codehaus.jettison.json.JSONException;
-import org.opentripplanner.api.common.RoutingResource;
-import org.opentripplanner.api.model.TripPlan;
-import org.opentripplanner.api.model.error.PlannerError;
+import org.opentripplanner.common.RoutingResource;
+import org.opentripplanner.model.TripPlan;
+import org.opentripplanner.model.error.PlannerError;
+import org.opentripplanner.routing.core.OptimizeType;
+import org.opentripplanner.routing.core.Request;
 import org.opentripplanner.routing.core.RoutingRequest;
+import org.opentripplanner.routing.core.TraverseModeSet;
+import org.opentripplanner.routing.core.TripRequest;
+import org.opentripplanner.routing.graph.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,6 +99,23 @@ public class Planner extends RoutingResource {
         return wrapGenerate(new OneArgFunc<TripPlan, RoutingRequest>() {
             public TripPlan call(RoutingRequest request) {
                 return planGenerator.generate(request);
+                
+                //REMOTE TEST
+        		/*TripRequest remoteTrip = new TripRequest();
+        		Request requestremota = new Request();
+        		
+        		requestremota.setFrom("42.835412,-2.670686");
+        		requestremota.setTo("42.873857,-2.679784");		
+        		requestremota.setOptimize(OptimizeType.QUICK);
+        		requestremota.setMaxWalkDistance(840.0);
+        		
+        		org.opentripplanner.routing.core.Response respuesta = null;
+        		TripPlan plan = null;
+        		
+        		respuesta = remoteTrip.requestPlan(requestremota);	
+        		plan = respuesta.getPlan();
+        		return plan;
+        		*/
             }});
     }
 

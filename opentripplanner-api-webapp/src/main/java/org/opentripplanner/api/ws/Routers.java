@@ -31,11 +31,11 @@ import javax.ws.rs.core.Response.Status;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.codehaus.jettison.json.JSONException;
-import org.opentripplanner.api.model.RouterInfo;
-import org.opentripplanner.api.model.RouterList;
 import org.opentripplanner.api.ws.impl.StoredHullService;
 import org.opentripplanner.api.ws.services.HullService;
 import org.opentripplanner.common.geometry.GraphUtils;
+import org.opentripplanner.model.RouterInfo;
+import org.opentripplanner.model.RouterList;
 import org.opentripplanner.routing.graph.Graph;
 import org.opentripplanner.routing.graph.Graph.LoadLevel;
 import org.opentripplanner.routing.impl.GraphServiceImpl;

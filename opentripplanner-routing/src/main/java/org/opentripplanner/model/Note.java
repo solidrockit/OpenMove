@@ -11,28 +11,27 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-package org.opentripplanner.api.model.error;
+package org.opentripplanner.model;
 
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
-public class TransitError {
-    private String message;
-    
-    public TransitError() {}
-    
-    public TransitError (String message) {
-        this.message = message;
-    }
-    
-    public void setMessage(String message) {
-        this.message = message;
-    }
+public class Note {
+	@XmlElement
+	public String text;
 
-    @XmlElement(name="message")
-    public String getMessage() {
-        return message;
-    }
-
+	public Note() {
+		/* Required by JAXB but unused */
+	}
+	
+	public Note(String note) {
+		text = note;
+	}
+	
+	public boolean equals(Object o) {
+		return (o instanceof Note) && ((Note) o).text.equals(text);
+	}
+	
+	public int hashCode() {
+		return text.hashCode();
+	}
 }

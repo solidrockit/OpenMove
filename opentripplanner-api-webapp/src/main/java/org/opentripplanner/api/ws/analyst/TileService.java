@@ -31,7 +31,7 @@ import org.opentripplanner.analyst.parameter.StyleList;
 import org.opentripplanner.analyst.request.RenderRequest;
 import org.opentripplanner.analyst.request.Renderer;
 import org.opentripplanner.analyst.request.TileRequest;
-import org.opentripplanner.api.common.RoutingResource;
+import org.opentripplanner.common.RoutingResource;
 import org.opentripplanner.routing.core.RoutingRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

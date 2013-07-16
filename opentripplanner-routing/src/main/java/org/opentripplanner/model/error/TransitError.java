@@ -11,15 +11,28 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-package org.opentripplanner.api.ws;
+package org.opentripplanner.model.error;
 
-/**
- * The start or end location that the user requested is not accessible given their mobility
- * constraints (wheelchair, etc)
- * 
- */
-public class LocationNotAccessible extends RuntimeException {
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
-    private static final long serialVersionUID = 1L;
+@XmlRootElement
+public class TransitError {
+    private String message;
+    
+    public TransitError() {}
+    
+    public TransitError (String message) {
+        this.message = message;
+    }
+    
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    @XmlElement(name="message")
+    public String getMessage() {
+        return message;
+    }
 
 }

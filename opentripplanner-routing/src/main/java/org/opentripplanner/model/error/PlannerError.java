@@ -12,14 +12,14 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
  */
 
-package org.opentripplanner.api.model.error;
+package org.opentripplanner.model.error;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.opentripplanner.api.common.Message;
-import org.opentripplanner.api.ws.LocationNotAccessible;
+import org.opentripplanner.common.Message;
+import org.opentripplanner.routing.core.LocationNotAccessible;
 import org.opentripplanner.routing.error.PathNotFoundException;
 import org.opentripplanner.routing.error.TransitTimesException;
 import org.opentripplanner.routing.error.TrivialPathException;

@@ -23,16 +23,17 @@ import java.util.TimeZone;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
-import org.opentripplanner.api.model.Itinerary;
-import org.opentripplanner.api.model.Leg;
-import org.opentripplanner.api.model.Place;
-import org.opentripplanner.api.model.RelativeDirection;
-import org.opentripplanner.api.model.TripPlan;
-import org.opentripplanner.api.model.WalkStep;
 import org.opentripplanner.common.geometry.DirectionUtils;
 import org.opentripplanner.common.geometry.GeometryUtils;
 import org.opentripplanner.common.geometry.PackedCoordinateSequence;
 import org.opentripplanner.common.model.P2;
+import org.opentripplanner.model.AgencyAndId;
+import org.opentripplanner.model.Itinerary;
+import org.opentripplanner.model.Leg;
+import org.opentripplanner.model.Place;
+import org.opentripplanner.model.RelativeDirection;
+import org.opentripplanner.model.TripPlan;
+import org.opentripplanner.model.WalkStep;
 import org.opentripplanner.routing.core.RoutingContext;
 import org.opentripplanner.routing.core.RoutingRequest;
 import org.opentripplanner.routing.core.State;
@@ -96,7 +97,7 @@ public class PlanGenerator {
         List<GraphPath> paths = null;
         boolean tooSloped = false;
         try {
-            paths = pathService.getPaths(options);
+            paths = pathService.getPaths(options); //aqui haria spt.getPaths();
             if (paths == null && options.isWheelchairAccessible()) {
                 // There are no paths that meet the user's slope restrictions.
                 // Try again without slope restrictions (and warn user).
@@ -427,7 +428,7 @@ public class PlanGenerator {
                             Place stop = makePlace(state.getBackState(), state.getBackState().getVertex().getName(), true);
                             leg.stop.add(stop);
                         } else if (leg.stop.size() > 0) {
-                            leg.stop.get(leg.stop.size() - 1).departure = makeCalendar(state);
+                            leg.stop.get(leg.stop.size() - 1).departure = makeCalendar(state).toString();
                         }
                     }
                     if (!route.equals(leg.route)) {
@@ -436,7 +437,7 @@ public class PlanGenerator {
                         leg = makeLeg(itinerary, state);
                         leg.stop = new ArrayList<Place>();
                         fixupTransitLeg(leg, state, transitIndex);
-                        leg.startTime = makeCalendar(state);
+                        leg.startTime = makeCalendar(state).toString();
                         leg.interlineWithPreviousLeg = true;
                     }
                 } else {
@@ -515,7 +516,7 @@ public class PlanGenerator {
             }
         }
         leg.mode = state.getBackMode().toString();
-        leg.startTime = makeCalendar(state.getBackState());
+        leg.startTime = makeCalendar(state.getBackState()).toString();
     }
 
     private void finalizeLeg(Leg leg, State state, List<State> states, int start, int end,
@@ -538,7 +539,7 @@ public class PlanGenerator {
 
             leg.walkSteps = getWalkSteps(states.subList(start, end + extra), continuation);
         }
-        leg.endTime = makeCalendar(state.getBackState());
+        leg.endTime = makeCalendar(state.getBackState()).toString();
         Geometry geometry = GeometryUtils.getGeometryFactory().createLineString(coordinates);
         leg.legGeometry = PolylineEncoder.createEncodings(geometry);
         Edge backEdge = state.getBackEdge();
@@ -594,7 +595,7 @@ public class PlanGenerator {
     private Leg makeLeg(Itinerary itinerary, State s) {
         Leg leg = new Leg();
         itinerary.addLeg(leg);
-        leg.startTime = makeCalendar(s.getBackState());
+        leg.startTime = makeCalendar(s.getBackState()).toString();
         leg.distance = 0.0;
         String name;
         Edge backEdge = s.getBackEdge();
@@ -622,8 +623,8 @@ public class PlanGenerator {
         State startState = path.states.getFirst();
         State endState = path.states.getLast();
 
-        itinerary.startTime = makeCalendar(startState);
-        itinerary.endTime = makeCalendar(endState);
+        itinerary.startTime = makeCalendar(startState).toString();
+        itinerary.endTime = makeCalendar(endState).toString();
         itinerary.duration = endState.getTimeInMillis() - startState.getTimeInMillis();
         itinerary.walkDistance = path.getWalkDistance();
 
@@ -658,7 +659,7 @@ public class PlanGenerator {
             if (backEdge instanceof OnBoardForwardEdge) {
                 place.stopIndex = ((OnBoardForwardEdge)backEdge).getStopIndex() + 1;
             }
-            place.stopId = transitVertex.getStopId();
+            place.stopId = new AgencyAndId(transitVertex.getStopId().getAgencyId(),transitVertex.getStopId().getId());
             place.stopCode = transitVertex.getStopCode();
             place.zoneId = state.getZone();
         }

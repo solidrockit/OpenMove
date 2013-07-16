@@ -1,15 +1,15 @@
 /* This program is free software: you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public License
- as published by the Free Software Foundation, either version 3 of
- the License, or (at your option) any later version.
+modify it under the terms of the GNU Lesser General Public License
+as published by the Free Software Foundation, either version 3 of
+the License, or (at your option) any later version.
 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>. */
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>. */
 
 package org.opentripplanner.api.ws;
 
@@ -22,8 +22,8 @@ import javax.servlet.ServletRequest;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.opentripplanner.api.model.TripPlan;
-import org.opentripplanner.api.model.error.PlannerError;
+import org.opentripplanner.model.TripPlan;
+import org.opentripplanner.model.error.PlannerError;
 import org.opentripplanner.routing.spt.GraphPath;
 
 /** Represents a trip planner response, will be serialized into XML or JSON by Jersey */
@@ -40,7 +40,7 @@ public class Response {
 
     public Response(ServletRequest sr) {
         this.requestParameters = new HashMap<String, String>();
-        if (sr == null) { 
+        if (sr == null) {
             // for tests where there is no http request
             return;
         }
@@ -56,8 +56,8 @@ public class Response {
     // e.g., from a human readable standpoint, it's tradition to have request params, followed by plan, followed by errors
 
     /**
-     * A dictionary of the parameters provided in the request that triggered this response.
-     */
+* A dictionary of the parameters provided in the request that triggered this response.
+*/
     public HashMap<String, String> getRequestParameters() {
         return requestParameters;
     }
@@ -67,8 +67,8 @@ public class Response {
     }
 
     /**
-     * The actual trip plan.
-     */
+* The actual trip plan.
+*/
     public TripPlan getPlan() {
         return plan;
     }
@@ -78,19 +78,19 @@ public class Response {
     }
     
     /**
-     * The actual paths of the trip.
-     */
+* The actual paths of the trip.
+*/
     public List<GraphPath> getPaths() {
         return paths;
     }
 
-	public void setPaths(List<GraphPath> paths) {
+public void setPaths(List<GraphPath> paths) {
         this.paths = paths;
-	}
+}
 
     /**
-     * The error (if any) that this response raised.
-     */
+* The error (if any) that this response raised.
+*/
     @XmlElement(required=false)
     public PlannerError getError() {
         return error;

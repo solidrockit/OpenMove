@@ -15,6 +15,8 @@ package org.opentripplanner.util.model;
 
 import java.io.Serializable;
 
+import org.simpleframework.xml.Element;
+
 /**
  * A list of coordinates encoded as a string.
  * 
@@ -26,10 +28,12 @@ public class EncodedPolylineBean implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @Element
     private String points;
 
     private String levels;
 
+    @Element
     private int length;
 
     public EncodedPolylineBean() {

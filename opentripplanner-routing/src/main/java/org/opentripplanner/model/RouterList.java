@@ -11,18 +11,18 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-package org.opentripplanner.api.common;
+package org.opentripplanner.model;
 
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * Signals a problem parsing or interpreting a query parameter.
- */
-public class ParameterException extends Exception {
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElements;
+import javax.xml.bind.annotation.XmlRootElement;
 
-    public Message message;
-    
-    public ParameterException(Message message) {
-        this.message = message;
-    }
+@XmlRootElement(name = "RouterList")
+public class RouterList {
+    @XmlElements(value = { @XmlElement(name="routerInfo") })
+    public List<RouterInfo> routerInfo = new ArrayList<RouterInfo>();
     
 }

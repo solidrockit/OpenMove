@@ -24,7 +24,7 @@ import org.aspectj.weaver.tools.ISupportsMessageContext;
 import org.geotools.referencing.GeodeticCalculator;
 import org.opensphere.geometry.algorithm.ConcaveHull;
 import org.opentripplanner.analyst.core.GeometryIndex;
-import org.opentripplanner.api.common.RoutingResource;
+import org.opentripplanner.common.RoutingResource;
 import org.opentripplanner.common.geometry.DirectionUtils;
 import org.opentripplanner.common.geometry.DistanceLibrary;
 import org.opentripplanner.common.geometry.ReversibleLineStringWrapper;

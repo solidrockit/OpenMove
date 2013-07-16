@@ -11,27 +11,15 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-package org.opentripplanner.api.model;
+package org.opentripplanner.routing.core;
 
-import javax.xml.bind.annotation.XmlElement;
+/**
+ * The start or end location that the user requested is not accessible given their mobility
+ * constraints (wheelchair, etc)
+ * 
+ */
+public class LocationNotAccessible extends RuntimeException {
 
-public class Note {
-	@XmlElement
-	public String text;
+    private static final long serialVersionUID = 1L;
 
-	public Note() {
-		/* Required by JAXB but unused */
-	}
-	
-	public Note(String note) {
-		text = note;
-	}
-	
-	public boolean equals(Object o) {
-		return (o instanceof Note) && ((Note) o).text.equals(text);
-	}
-	
-	public int hashCode() {
-		return text.hashCode();
-	}
 }

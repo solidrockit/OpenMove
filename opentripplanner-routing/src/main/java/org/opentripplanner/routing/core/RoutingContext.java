@@ -28,12 +28,17 @@ import org.opentripplanner.routing.edgetype.TimetableResolver;
 import org.opentripplanner.routing.error.TransitTimesException;
 import org.opentripplanner.routing.error.VertexNotFoundException;
 import org.opentripplanner.routing.graph.Graph;
+import org.opentripplanner.routing.graph.Server;
 import org.opentripplanner.routing.graph.Vertex;
 import org.opentripplanner.routing.impl.DefaultRemainingWeightHeuristicFactoryImpl;
 import org.opentripplanner.routing.location.StreetLocation;
 import org.opentripplanner.routing.pathparser.PathParser;
+import org.opentripplanner.routing.request.BannedStopSet;
 import org.opentripplanner.routing.services.RemainingWeightHeuristicFactory;
 import org.opentripplanner.routing.services.TransitIndexService;
+import org.opentripplanner.routing.vertextype.RemoteStreetVertex;
+import org.opentripplanner.routing.vertextype.RemoteTransitVertex;
+import org.opentripplanner.routing.vertextype.SharedVertex;
 import org.opentripplanner.routing.vertextype.TransitStop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,12 +60,12 @@ public class RoutingContext implements Cloneable {
     
     public RoutingRequest opt; // not final so we can reverse-clone
     public final Graph graph;
-    public final Vertex fromVertex;
-    public final Vertex toVertex;
+    public Vertex fromVertex;
+    public Vertex toVertex;
     // origin means "where the initial state will be located" not "the beginning of the trip from the user's perspective"
-    public final Vertex origin;
+    public Vertex origin;
     // target means "where this search will terminate" not "the end of the trip from the user's perspective"
-    public final Vertex target;
+    public Vertex target;
     public final ArrayList<Vertex> intermediateVertices = new ArrayList<Vertex>();
     //public final Calendar calendar;
     public final CalendarService calendarService;
@@ -90,6 +95,12 @@ public class RoutingContext implements Cloneable {
     public PathParser[] pathParsers = new PathParser[] { };
 
     public Vertex startingStop;
+    
+    //For distributed searches
+    private boolean distributedSearch;
+    private Vertex originFromVertex;
+    private Vertex finalToVertex;
+    
     
     /* CONSTRUCTORS */
     
@@ -152,7 +163,7 @@ public class RoutingContext implements Cloneable {
     
     
     /* INSTANCE METHODS */
-    
+      
     public void check() {
         ArrayList<String> notFound = new ArrayList<String>();
 
@@ -181,7 +192,63 @@ public class RoutingContext implements Cloneable {
         }
     }
     
-    /**
+    public boolean isVertexremote(Vertex vertex) {
+    	//Vertex is remote
+    	return vertex instanceof RemoteTransitVertex || vertex instanceof RemoteStreetVertex;
+	}
+
+	public Server getOriginServer() {
+		Server originServer = null;
+		if (originFromVertex != null)
+		{
+				if (originFromVertex instanceof RemoteTransitVertex) originServer = ((RemoteTransitVertex)originFromVertex).getNeighbour();
+				else if (originFromVertex instanceof RemoteStreetVertex) originServer = ((RemoteStreetVertex)originFromVertex).getNeighbour();
+		}
+		return originServer;
+	}
+
+
+	public Server getFinalServer() {
+		Server finalServer = null;
+		if (finalToVertex != null)
+		{
+				if (finalToVertex instanceof RemoteTransitVertex) finalServer = ((RemoteTransitVertex)finalToVertex).getNeighbour();
+				else if (finalToVertex instanceof RemoteStreetVertex) finalServer = ((RemoteStreetVertex)finalToVertex).getNeighbour();
+		}
+		return finalServer;
+	}
+	
+	public SharedVertex getSharedVertexForRouting(Server neighbour, boolean updateToVertex) {
+		SharedVertex node = null;
+		if (neighbour.isNeighbour())
+		{
+			do { //do while sharedvertex is not banned
+				node = neighbour.getSharedVertexList().entrySet().iterator().next().getValue();
+			} while (!opt.isSharedVertexBanned(node));
+			
+			if (updateToVertex) {
+				this.toVertex = node;
+				this.target = node;
+			} else {
+				this.fromVertex = node;
+				this.origin = node;
+			}				
+		} //else Algoritmo MOSCA - MIS
+		return node;
+	}
+	
+	public void updateSharedNode (boolean updateToVertex)
+	{
+		//Get the server of the routing node (origin or final node)
+		Server neighbour = updateToVertex ? this.getFinalServer() : this.getOriginServer();
+		Vertex NewVertexForRouting = getSharedVertexForRouting(neighbour, updateToVertex);
+		
+		if (updateToVertex) finalToVertex = NewVertexForRouting;
+		else originFromVertex = NewVertexForRouting;
+	}
+
+
+	/**
      *  Cache ServiceDay objects representing which services are running yesterday, today, and tomorrow relative
      *  to the search time. This information is very heavily used (at every transit boarding) and Date operations were
      *  identified as a performance bottleneck. Must be called after the TraverseOptions already has a CalendarService set. 
