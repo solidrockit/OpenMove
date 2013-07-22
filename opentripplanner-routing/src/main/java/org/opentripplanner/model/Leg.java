@@ -26,6 +26,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>. */
 
 package org.opentripplanner.model;
 
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -36,6 +38,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 
+import org.opentripplanner.util.DateUtils;
 import org.opentripplanner.util.model.EncodedPolylineBean;
 import org.opentripplanner.routing.core.TraverseMode;
 import org.opentripplanner.routing.patch.Alert;
@@ -64,7 +67,7 @@ public class Leg {
 */
 	@Element(required=false)
     public String endTime = null;
-    
+	
     /**
 * The distance traveled while traversing the leg in meters.
 */
@@ -310,12 +313,25 @@ public class Leg {
     }
 
     public void setTimeZone(TimeZone timeZone) {
+    	
         Calendar calendar = Calendar.getInstance(timeZone);
-        calendar.setTime(new Date(startTime));
-        startTime = calendar.toString();
+        try {
+			calendar.setTime(DateUtils.dateFormat.parse(startTime));
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        startTime = DateUtils.dateFormat.format(calendar.getTime());
+        
         calendar = Calendar.getInstance(timeZone);
-        calendar.setTime(new Date(endTime));
-        endTime = calendar.toString();
-        agencyTimeZoneOffset = timeZone.getOffset(new Date(startTime).getTime());
+        try {
+			calendar.setTime(DateUtils.dateFormat.parse(endTime));
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        endTime = DateUtils.dateFormat.format(calendar.getTime());
+        
+        agencyTimeZoneOffset = timeZone.getOffset(calendar.getTime().getTime());
     }
 }

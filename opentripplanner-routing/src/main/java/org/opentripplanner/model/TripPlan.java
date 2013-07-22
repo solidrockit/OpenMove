@@ -19,6 +19,7 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlElementWrapper;
 
+import org.opentripplanner.util.DateUtils;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 
@@ -58,7 +59,7 @@ public class TripPlan {
     public TripPlan(Place from, Place to, Date date) {
         this.from = from;
         this.to = to;
-        this.date = date.toString();
+        this.date = DateUtils.dateFormat.format(date);
     }
     
     public void addItinerary(Itinerary itinerary) {

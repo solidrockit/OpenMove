@@ -12,6 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>. */
 package org.opentripplanner.model;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -24,6 +25,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.opentripplanner.routing.core.Fare;
+import org.opentripplanner.util.DateUtils;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 
@@ -49,7 +51,7 @@ public class Itinerary {
 	@Element(required=false)
     public String endTime = null;
 
-    /**
+/**
 * How much time is spent walking, in seconds.
 */
 	@Element
@@ -162,8 +164,13 @@ public class Itinerary {
         }
         if (timeZone != null) {
             Calendar calendar = Calendar.getInstance(startTimeZone);
-            calendar.setTime(new Date(startTime));
-            startTime = calendar.toString();
+            try {
+				calendar.setTime(DateUtils.dateFormat.parse(startTime));
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+            startTime = DateUtils.dateFormat.format(calendar.getTime());
             // go back and set timezone for legs prior to first transit
             it = legs.iterator();
             while (it.hasNext()) {
@@ -175,8 +182,13 @@ public class Itinerary {
                 }
             }
             calendar = Calendar.getInstance(timeZone);
-            calendar.setTime(new Date(endTime));
-            endTime = calendar.toString();
+            try {
+				calendar.setTime(DateUtils.dateFormat.parse(endTime));
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+            endTime = DateUtils.dateFormat.format(calendar.getTime());
         }
     }
 }

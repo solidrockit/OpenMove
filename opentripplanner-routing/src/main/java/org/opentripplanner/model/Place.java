@@ -96,11 +96,13 @@ public class Place {
 */
     //TODO remove or fix!
     @XmlElement
-    /*String getGeometry() {
-        return Constants.GEO_JSON_POINT + lon + "," + lat + Constants.GEO_JSON_TAIL;
-    }*/
     @Element(required=false)
-    public String geometry = "";
+    String getGeometry() {
+        return Constants.GEO_JSON_POINT + lon + "," + lat + Constants.GEO_JSON_TAIL;
+    }
+    
+    /*@Element(required=false)
+    public String geometry = this.getGeometry();*/
 
     public Place() {
     }

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+    <bean id="gtfsBuilder" class="org.opentripplanner.graph_builder.impl.GtfsGraphBuilderImpl">
+        <property name="gtfsBundles">
+            <bean id="gtfsBundles" class="org.opentripplanner.graph_builder.model.GtfsBundles">
+                <property name="bundles">
+                    <list>
+                        <bean class="org.opentripplanner.graph_builder.model.GtfsBundle">
+                            	<property name="path" value="graph_config/gtfs/Araba/adnor.zip" />
+                            	<property name="defaultBikesAllowed" value="true" />
+				<property name="defaultAgencyId" value="172" />
+                        </bean>
+			<bean class="org.opentripplanner.graph_builder.model.GtfsBundle">
+                            	<property name="path" value="graph_config/gtfs/Araba/aja.zip" />
+                            	<property name="defaultBikesAllowed" value="true" />
+				<property name="defaultAgencyId" value="176" />
+                        </bean>
+			<bean class="org.opentripplanner.graph_builder.model.GtfsBundle">
+                            	<property name="path" value="graph_config/gtfs/Araba/alegria.zip" />
+                            	<property name="defaultBikesAllowed" value="true" />
+				<property name="defaultAgencyId" value="173" />
+                        </bean>
+			<bean class="org.opentripplanner.graph_builder.model.GtfsBundle">
+                            	<property name="path" value="graph_config/gtfs/Araba/autoyon.zip" />
+                            	<property name="defaultBikesAllowed" value="true" />
+				<property name="defaultAgencyId" value="175" />
+                        </bean>
+			<bean class="org.opentripplanner.graph_builder.model.GtfsBundle">
+                            	<property name="path" value="graph_config/gtfs/Araba/burundesa.zip" />
+                            	<property name="defaultBikesAllowed" value="true" />
+				<property name="defaultAgencyId" value="147" />
+                        </bean>
+			<bean class="org.opentripplanner.graph_builder.model.GtfsBundle">
+                            	<property name="path" value="graph_config/gtfs/Araba/la_union.zip" />
+                            	<property name="defaultBikesAllowed" value="true" />
+				<property name="defaultAgencyId" value="146" />
+                        </bean>
+			<bean class="org.opentripplanner.graph_builder.model.GtfsBundle">
+                            	<property name="path" value="graph_config/gtfs/Araba/la_vitoriana.zip" />
+                            	<property name="defaultBikesAllowed" value="true" />
+				<property name="defaultAgencyId" value="178" />
+                        </bean>
+			<bean class="org.opentripplanner.graph_builder.model.GtfsBundle">
+                            	<property name="path" value="graph_config/gtfs/Araba/palacio.zip" />
+                            	<property name="defaultBikesAllowed" value="true" />
+				<property name="defaultAgencyId" value="174" />
+                        </bean>
+			<bean class="org.opentripplanner.graph_builder.model.GtfsBundle">
+                            	<property name="path" value="graph_config/gtfs/Araba/pinedo.zip" />
+                            	<property name="defaultBikesAllowed" value="true" />
+				<property name="defaultAgencyId" value="177" />
+                        </bean>
+			<bean class="org.opentripplanner.graph_builder.model.GtfsBundle">
+                            	<property name="path" value="graph_config/gtfs/Araba/tuvisa.zip" />
+                            	<property name="defaultBikesAllowed" value="true" />
+				<property name="defaultAgencyId" value="TuvisaTran" />
+                        </bean>
+			<bean class="org.opentripplanner.graph_builder.model.GtfsBundle">
+                            	<property name="path" value="graph_config/gtfs/Araba/zadorra.zip" />
+                            	<property name="defaultBikesAllowed" value="true" />
+				<property name="defaultAgencyId" value="179" />
+                        </bean>
+                    </list>
+                </property>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="osmBuilder" class="org.opentripplanner.graph_builder.impl.osm.OpenStreetMapGraphBuilderImpl">
+        <property name="provider">
+            <bean class="org.opentripplanner.openstreetmap.impl.RegionBasedOpenStreetMapProviderImpl">
+                <property name="regionsSource">
+                    <bean class="org.opentripplanner.graph_builder.impl.TransitStopsRegionsSourceImpl" />
+                </property>
+                <property name="cacheDirectory" value="graph_config/otp/osm" />
+            </bean>
+        </property>
+        <property name="defaultWayPropertySetSource">
+            <bean class="org.opentripplanner.graph_builder.impl.osm.DefaultWayPropertySetSource" />
+        </property>
+    </bean>
+
+    <bean id="floatingIslands" class="org.opentripplanner.graph_builder.impl.PruneFloatingIslands">
+        <property name="maxIslandSize" value="1000 "/>
+        <property name="islandLogFile" value="{graphPath}/island.csv"/>
+        <property name="islandWithStopMaxSize" value="20"/>
+        <property name="transitToStreetNetwork" ref ="transitStreetLink"/>
+    </bean>
+
+    <bean id="transitStreetLink" class="org.opentripplanner.graph_builder.impl.TransitToStreetNetworkGraphBuilderImpl" />
+    <!-- <bean id="optimizeTransit" class="org.opentripplanner.graph_builder.impl.OptimizeTransitGraphBuilderImpl" /> -->
+
+    <bean id="graphBuilderTask" class="org.opentripplanner.graph_builder.GraphBuilderTask">
+        <property name="path" value="/home/aitzol/otp/graph-bundle" />
+        <property name="graphBuilders">
+            <list>
+                <!-- GTFS comes before OSM, because we use the loaded set of stops to determine our OSM coverage -->
+                <ref bean="gtfsBuilder" />
+                <ref bean="osmBuilder" />
+                <!-- the transmit link should became before the floating islands in order to find islands with stops-->
+                <ref bean="transitStreetLink" />
+                <ref bean="floatingIslands" />
+                <!-- <ref bean="optimizeTransit" /> -->
+
+            </list>
+        </property>
+    </bean>
+</beans>

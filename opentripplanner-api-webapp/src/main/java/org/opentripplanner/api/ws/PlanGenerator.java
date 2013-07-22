@@ -66,6 +66,7 @@ import org.opentripplanner.routing.services.TransitIndexService;
 import org.opentripplanner.routing.spt.GraphPath;
 import org.opentripplanner.routing.vertextype.ExitVertex;
 import org.opentripplanner.routing.vertextype.TransitVertex;
+import org.opentripplanner.util.DateUtils;
 import org.opentripplanner.util.PolylineEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -437,7 +438,7 @@ public class PlanGenerator {
                         leg = makeLeg(itinerary, state);
                         leg.stop = new ArrayList<Place>();
                         fixupTransitLeg(leg, state, transitIndex);
-                        leg.startTime = makeCalendar(state).toString();
+                        leg.startTime = DateUtils.dateFormat.format(makeCalendar(state).getTime());
                         leg.interlineWithPreviousLeg = true;
                     }
                 } else {
@@ -515,8 +516,8 @@ public class PlanGenerator {
                 leg.agencyUrl = agency.getUrl();
             }
         }
-        leg.mode = state.getBackMode().toString();
-        leg.startTime = makeCalendar(state.getBackState()).toString();
+        leg.mode = state.getBackMode().toString();       
+        leg.startTime = DateUtils.dateFormat.format(makeCalendar(state.getBackState()).getTime());
     }
 
     private void finalizeLeg(Leg leg, State state, List<State> states, int start, int end,
@@ -539,7 +540,7 @@ public class PlanGenerator {
 
             leg.walkSteps = getWalkSteps(states.subList(start, end + extra), continuation);
         }
-        leg.endTime = makeCalendar(state.getBackState()).toString();
+        leg.endTime = DateUtils.dateFormat.format(makeCalendar(state.getBackState()).getTime());
         Geometry geometry = GeometryUtils.getGeometryFactory().createLineString(coordinates);
         leg.legGeometry = PolylineEncoder.createEncodings(geometry);
         Edge backEdge = state.getBackEdge();
@@ -595,7 +596,7 @@ public class PlanGenerator {
     private Leg makeLeg(Itinerary itinerary, State s) {
         Leg leg = new Leg();
         itinerary.addLeg(leg);
-        leg.startTime = makeCalendar(s.getBackState()).toString();
+        leg.startTime = DateUtils.dateFormat.format(makeCalendar(s.getBackState()).getTime());
         leg.distance = 0.0;
         String name;
         Edge backEdge = s.getBackEdge();
@@ -623,8 +624,8 @@ public class PlanGenerator {
         State startState = path.states.getFirst();
         State endState = path.states.getLast();
 
-        itinerary.startTime = makeCalendar(startState).toString();
-        itinerary.endTime = makeCalendar(endState).toString();
+        itinerary.startTime = DateUtils.dateFormat.format(makeCalendar(startState).getTime());
+        itinerary.endTime = DateUtils.dateFormat.format(makeCalendar(endState).getTime());
         itinerary.duration = endState.getTimeInMillis() - startState.getTimeInMillis();
         itinerary.walkDistance = path.getWalkDistance();
 
