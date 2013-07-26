@@ -31,6 +31,7 @@ public class SharedVertex extends TransitStop {
 
     private String sharedId;
     private Server neighbour;
+    private boolean localStop;
     
     public PathService pathService;
     
@@ -38,11 +39,11 @@ public class SharedVertex extends TransitStop {
 		super(graph, stop);
 	}
 
-	public SharedVertex(Graph graph, Stop stop, String sharedId,
-			Server neighbour) {
+	public SharedVertex(Graph graph, Stop stop, String sharedId, Server neighbour) {
 		super(graph, stop);
 		this.sharedId = sharedId;
 		this.neighbour = neighbour;
+		this.localStop = false;
 	}
     
 	public String getSharedId() {
@@ -59,6 +60,14 @@ public class SharedVertex extends TransitStop {
 
 	public void setNeighbour(Server neighbour) {
 		this.neighbour = neighbour;
+	}
+	
+	public boolean isLocalStop() {
+		return localStop;
+	}
+
+	public void setLocalStop(boolean localStop) {
+		this.localStop = localStop;
 	}
 
 	public TripPlan sendRequestToNeighbour(RoutingRequest options)

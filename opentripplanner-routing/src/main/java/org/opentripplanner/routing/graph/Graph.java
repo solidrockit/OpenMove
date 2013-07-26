@@ -121,6 +121,7 @@ public class Graph implements Serializable {
 
     public Graph() {
         this.vertices = new ConcurrentHashMap<String, Vertex>();
+        this.serverList = new HashMap<String, Server>();
         temporaryEdges = Collections.newSetFromMap(new ConcurrentHashMap<Edge, Boolean>());
     }
     

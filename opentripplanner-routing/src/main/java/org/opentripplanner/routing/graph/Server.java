@@ -68,7 +68,7 @@ import com.vividsolutions.jts.geom.Envelope;
  */
 public class Server implements Serializable {
 
-    private long id;
+    private String id;
     private String globalId;
     private String name;
     private String serviceUrl;
@@ -78,9 +78,11 @@ public class Server implements Serializable {
     
 	public Server() {
 		super();
+		this.inMis = false; //default
+		this.sharedVertexList = new HashMap<String, SharedVertex>();
 	}
 
-	public Server(long id, String globalId, String name, String serviceUrl,
+	public Server(String id, String globalId, String name, String serviceUrl,
 			String url, Map<String, SharedVertex> sharedVertexList,
 			boolean inMis) {
 		super();
@@ -93,11 +95,11 @@ public class Server implements Serializable {
 		this.inMis = inMis;
 	}
 
-	public long getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 

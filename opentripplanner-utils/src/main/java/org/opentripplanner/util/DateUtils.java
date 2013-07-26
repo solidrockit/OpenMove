@@ -44,11 +44,12 @@ public class DateUtils implements DateConstants {
     public final static SimpleDateFormat dateFormat;
     static {
         //as per ISO 8601
-        dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
         //make sure the formatter requires an exact string
         dateFormat.setLenient(false);
         //set "timezone" to Universal Time Coordinates (GMT adjusted by leap seconds)
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        //dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        dateFormat.setTimeZone(TimeZone.getDefault());
     }
     
     static public Date toDate(String date, String time, TimeZone tz) {
