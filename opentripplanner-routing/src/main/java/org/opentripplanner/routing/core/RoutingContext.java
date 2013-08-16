@@ -101,7 +101,6 @@ public class RoutingContext implements Cloneable {
     private Vertex originFromVertex;
     private Vertex finalToVertex;
     
-    
     /* CONSTRUCTORS */
     
     public RoutingContext(RoutingRequest traverseOptions, Graph graph, 

@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.opentripplanner.graph_builder.impl.SharedVertexGraphBuilderImpl;
 import org.opentripplanner.graph_builder.services.GraphBuilder;
 import org.opentripplanner.routing.core.RoutingRequest;
 import org.opentripplanner.routing.graph.Graph;
@@ -125,7 +126,7 @@ public class GraphBuilderTask implements Runnable {
         HashMap<Class<?>, Object> extra = new HashMap<Class<?>, Object>();
         for (GraphBuilder load : _graphBuilders)
             load.buildGraph(graph, extra);
-
+        
         graph.summarizeBuilderAnnotations();
         try {
             graph.save(graphFile);

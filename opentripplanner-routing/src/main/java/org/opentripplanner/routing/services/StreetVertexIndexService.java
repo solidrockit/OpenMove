@@ -42,7 +42,7 @@ public interface StreetVertexIndexService {
 	 * @return
 	 */
 	public Vertex getClosestVertex(final Coordinate location, String name,
-			RoutingRequest request);
+			RoutingRequest request, boolean searchInNeighbours);
 
 	/**
 	 * Get the closest vertex that can be traversed by this request.
@@ -57,7 +57,7 @@ public interface StreetVertexIndexService {
 	 * @return
 	 */
 	public Vertex getClosestVertex(final Coordinate location, String name,
-			RoutingRequest request, List<Edge> extraEdges);
+			RoutingRequest request, List<Edge> extraEdges, boolean searchInNeighbours);
 
 	/**
 	 * Returns the vertices intersecting with the specified envelope.

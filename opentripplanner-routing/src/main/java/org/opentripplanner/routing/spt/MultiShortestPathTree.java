@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.opentripplanner.common.MavenVersion;
+import org.opentripplanner.model.TripPlan;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.RoutingRequest;
 import org.opentripplanner.routing.graph.Vertex;
@@ -33,6 +34,8 @@ public class MultiShortestPathTree extends AbstractShortestPathTree {
     public static final ShortestPathTreeFactory FACTORY = new FactoryImpl();
 
     private Map<Vertex, List<State>> stateSets;
+    
+    private TripPlan delegatedPathResults;
 
     public MultiShortestPathTree(RoutingRequest options) {
         super(options);
@@ -125,6 +128,22 @@ public class MultiShortestPathTree extends AbstractShortestPathTree {
             allStates.addAll(stateSet);
         }
         return allStates;
+    }
+    
+    /**
+     * 
+     * @return
+     */
+    public TripPlan getDelegatedPaths() {
+        return this.delegatedPathResults;
+    }
+    
+    /**
+     * 
+     * @param pathResults
+     */
+    public void setDelegatedPaths(TripPlan pathResults) {
+        this.delegatedPathResults = pathResults;
     }
 
 }

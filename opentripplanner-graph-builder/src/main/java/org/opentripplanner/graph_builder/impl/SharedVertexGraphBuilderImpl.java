@@ -32,6 +32,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.opentripplanner.graph_builder.services.GraphBuilder;
 import org.opentripplanner.gtfs.GtfsLibrary;
+import org.opentripplanner.routing.edgetype.loader.NetworkLinker;
 import org.opentripplanner.routing.graph.Graph;
 import org.opentripplanner.routing.graph.Server;
 import org.opentripplanner.routing.graph.Vertex;
@@ -131,7 +132,8 @@ public class SharedVertexGraphBuilderImpl implements GraphBuilder {
 					// 6.1) Añadir el objeto de vecino a la lista serverList del grafo
 					graph.getServerList().put(server.getGlobalId(), server);
 					// 7) Conectar los nodos compartidos a los nodos EndPointVertex
-				
+					NetworkLinker nl = new NetworkLinker(graph);
+					nl.createLinkage();
 				}
 			}
 		} catch (ParserConfigurationException e) {

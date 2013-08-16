@@ -15,11 +15,13 @@ package org.opentripplanner.routing.impl;
 
 import static org.opentripplanner.common.IterableLibrary.filter;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -28,10 +30,13 @@ import java.util.regex.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.opentripplanner.common.IterableLibrary;
 import org.opentripplanner.common.geometry.DistanceLibrary;
 import org.opentripplanner.common.geometry.SphericalDistanceLibrary;
 import org.opentripplanner.common.model.NamedPlace;
+import org.opentripplanner.routing.core.Http;
 import org.opentripplanner.routing.core.LocationObservation;
 import org.opentripplanner.routing.core.RoutingRequest;
 import org.opentripplanner.routing.core.TraversalRequirements;
@@ -40,6 +45,7 @@ import org.opentripplanner.routing.edgetype.FreeEdge;
 import org.opentripplanner.routing.edgetype.StreetEdge;
 import org.opentripplanner.routing.graph.Edge;
 import org.opentripplanner.routing.graph.Graph;
+import org.opentripplanner.routing.graph.Server;
 import org.opentripplanner.routing.graph.Vertex;
 import org.opentripplanner.routing.location.StreetLocation;
 import org.opentripplanner.routing.services.StreetVertexIndexService;
@@ -170,15 +176,16 @@ public class StreetVertexIndexServiceImpl implements StreetVertexIndexService {
         return results;
     }
 
+    
     /**
      * Gets the closest vertex to a coordinate. If necessary, this vertex will be created by splitting nearby edges (non-permanently).
      */
-    public Vertex getClosestVertex(final Coordinate coordinate, String name, RoutingRequest options) {
-        return getClosestVertex(coordinate, name, options, null);
+    public Vertex getClosestVertex(final Coordinate coordinate, String name, RoutingRequest options, boolean searchInNeighbours) {
+        return getClosestVertex(coordinate, name, options, null,searchInNeighbours);
     }
 
     public Vertex getClosestVertex(final Coordinate coordinate, String name,
-            RoutingRequest options, List<Edge> extraEdges) {
+            RoutingRequest options, List<Edge> extraEdges, boolean searchInNeighbours) {
         _log.debug("Looking for/making a vertex near {}", coordinate);
 
         // first, check for intersections very close by
@@ -256,11 +263,13 @@ public class StreetVertexIndexServiceImpl implements StreetVertexIndexService {
                     bundle.toEdgeList(), nearestPoint, coordinate);
         }
 
+        Vertex closestVertex = null;
         // decide whether to return street, or street + stop
         if (closestStreet == null) {
             // no street found, return closest stop or null
             _log.debug("returning only transit stop (no street found)");
-            return closestStop; // which will be null if none was found
+            //return closestStop; // which will be null if none was found
+            closestVertex = closestStop; 
         } else {
             // street found
             if (closestStop != null) {
@@ -272,8 +281,36 @@ public class StreetVertexIndexServiceImpl implements StreetVertexIndexService {
                 }
             }
             _log.debug("returning split street");
-            return closestStreet;
+            //return closestStreet;
+            closestVertex = closestStreet;  
         }
+        if (closestVertex == null && searchInNeighbours) {
+
+            Map<String, Server> serverList = graph.getServerList();
+            Server server;
+            HttpClient client = new DefaultHttpClient();
+            String result = "";
+            String ws = "/opentripplanner-api-webapp/ws/dsearch/getVertexForPlace";
+            String params = "?location=" + coordinate;
+            for (String key : serverList.keySet()) {
+                server = (Server)serverList.get(key);
+                String url = server.getServiceUrl() + ws + params;
+                try {
+                  result = Http.get(url).use(client).header("Accept", "application/xml").header("Keep-Alive","timeout=60, max=100").charset("UTF-8").followRedirects(true).asString();
+                  // TODO:  tratar el resultado...
+                  
+                  
+                } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                        return null;
+                }
+            }
+            
+            
+        }
+        
+        return closestVertex;
     }
 
     @SuppressWarnings("unchecked")
@@ -463,6 +500,28 @@ public class StreetVertexIndexServiceImpl implements StreetVertexIndexService {
         return getVertexForPlace(place, options, null);
     }
 
+    public Vertex getVertexForPlace(NamedPlace place, RoutingRequest options,Vertex other, Boolean searchInNeighbors) {
+        if (place == null || place.place == null) {
+            return null;
+        }
+
+        Matcher matcher = _latLonPattern.matcher(place.place);
+        if (matcher.matches()) {
+            double lat = Double.parseDouble(matcher.group(1));
+            double lon = Double.parseDouble(matcher.group(4));
+            Coordinate location = new Coordinate(lon, lat);
+            if (other instanceof StreetLocation) {
+                return getClosestVertex(location, place.name, options,
+                        ((StreetLocation) other).getExtra(),searchInNeighbors);
+            } else {
+                return getClosestVertex(location, place.name, options,searchInNeighbors);
+            }
+        }
+
+        // did not match lat/lon, interpret place as a vertex label.
+        // this should probably only be used in tests.
+        return graph.getVertex(place.place);
+    }
     /**
      * @param other: non-null when another vertex has already been found. When the from vertex has
      * already been made/found, that vertex is passed in when finding/creating the to vertex. 
@@ -481,9 +540,9 @@ public class StreetVertexIndexServiceImpl implements StreetVertexIndexService {
             Coordinate location = new Coordinate(lon, lat);
             if (other instanceof StreetLocation) {
                 return getClosestVertex(location, place.name, options,
-                        ((StreetLocation) other).getExtra());
+                        ((StreetLocation) other).getExtra(),true);
             } else {
-                return getClosestVertex(location, place.name, options);
+                return getClosestVertex(location, place.name, options,true);
             }
         }
 

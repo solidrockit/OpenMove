@@ -32,6 +32,7 @@ import org.opentripplanner.routing.graph.Edge;
 import org.opentripplanner.routing.graph.Graph;
 import org.opentripplanner.routing.graph.Vertex;
 import org.opentripplanner.routing.vertextype.BikeRentalStationVertex;
+import org.opentripplanner.routing.vertextype.SharedVertex;
 import org.opentripplanner.routing.vertextype.TransitStop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,6 +89,31 @@ public class NetworkLinker {
                 }
             }
         }
+        
+        // Connect SharedVertex type vertices
+
+        for (SharedVertex sv : IterableLibrary.filter(vertices, SharedVertex.class)) {
+            // if the street is already linked there is no need to linked it again,
+            // could happened if using the prune isolated island
+            boolean alreadyLinked = false;
+            for(Edge e:sv.getOutgoing()){
+                if(e instanceof StreetTransitLink) {
+                    alreadyLinked = true;
+                    break;
+                }
+            }
+            if(alreadyLinked) continue;
+            // only connect shared vertex that (a) are entrances, or (b) have no associated
+            // entrances
+            if (sv.isEntrance() || !sv.hasEntrances()) {
+                boolean wheelchairAccessible = sv.hasWheelchairEntrance();
+                if (!networkLinkerLibrary.connectVertexToStreets(sv, wheelchairAccessible).getResult()) {
+                    _log.warn(graph.addBuilderAnnotation(new StopUnlinked(sv)));
+                }
+            }
+        }
+        
+        
         //remove replaced edges
         for (HashSet<StreetEdge> toRemove : networkLinkerLibrary.replacements.keySet()) {
             for (StreetEdge edge : toRemove) {

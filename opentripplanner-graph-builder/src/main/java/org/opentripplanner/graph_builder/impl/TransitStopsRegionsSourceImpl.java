@@ -19,6 +19,7 @@ import java.util.List;
 import org.opentripplanner.graph_builder.GraphBuilderTask;
 import org.opentripplanner.openstreetmap.services.RegionsSource;
 import org.opentripplanner.routing.graph.Vertex;
+import org.opentripplanner.routing.vertextype.SharedVertex;
 import org.opentripplanner.routing.vertextype.TransitStop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +58,17 @@ public class TransitStopsRegionsSourceImpl implements RegionsSource {
                 env.expandBy(distance / meters_per_degree_lon_here,  
                         distance / METERS_PER_DEGREE_LAT);
                 regions.add(env);
+            }
+            else if (gv instanceof SharedVertex) {
+                if (((SharedVertex) gv).isLocalStop()) {
+                    Coordinate c = gv.getCoordinate();
+                    Envelope env = new Envelope(c);
+                    double meters_per_degree_lon_here =  
+                        METERS_PER_DEGREE_LAT * Math.cos(Math.toRadians(c.y));
+                    env.expandBy(distance / meters_per_degree_lon_here,  
+                            distance / METERS_PER_DEGREE_LAT);
+                    regions.add(env);
+                }
             }
         }
 
