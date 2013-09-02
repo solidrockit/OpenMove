@@ -24,6 +24,7 @@ import org.opentripplanner.routing.core.RoutingContext;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.graph.Edge;
 import org.opentripplanner.routing.graph.Vertex;
+import org.opentripplanner.model.TripPlan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +45,9 @@ public class GraphPath {
 
     // don't really need to save this (available through State) but why not
     private RoutingContext rctx;
+    
+    // Need to restore
+    private TripPlan remoteSearch;
 
     /**
      * Construct a GraphPath based on the given state by following back-edge fields all the way back
@@ -63,6 +67,7 @@ public class GraphPath {
     public GraphPath(State s, boolean optimize) {
         this.rctx = s.getContext();
         this.back = s.getOptions().isArriveBy();
+        this.remoteSearch = null;
         
         /* Put path in chronological order, and optimize as necessary */
         State lastState;
@@ -209,6 +214,14 @@ public class GraphPath {
     
     public RoutingContext getRoutingContext() {
         return rctx;
+    }
+    
+    public TripPlan getRemoteSearch(){
+    	return this.remoteSearch;
+    }
+    
+    public void setRemoteSearch(TripPlan remoteSearch){
+    	this.remoteSearch = remoteSearch;
     }
 
 }

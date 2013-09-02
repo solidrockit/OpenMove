@@ -116,75 +116,79 @@ public class LocalStopFinder {
 
             HashMap<TripPattern, P2<Double>> previousDistances = null;
             HashMap<TripPattern, P2<Double>> distances = null;
-            for (int i = 0; i < stops.size() - 1; ++i) {
-                Stop stop = stops.get(i);
-
-                TransitStop transitStop = getVertexForStop(stop);
-
-                previousDistances = distances;
-                distances = getNeighborhood(stop);
-                HashMap<TripPattern, P2<Double>> nextDistances = null;
-                Stop nextStop = stops.get(i + 1);
-                nextDistances = getNeighborhood(nextStop);
-
-                if (previousDistances == null) {
-                    // first stop is never local
-                    if (transitStop.isLocal()) {
-                        nonLocal ++;
-                    }
-                    transitStop.setLocal(false);
-                    continue;
-                } else {
-                    boolean local = true;
-                    for (Entry<TripPattern, P2<Double>> entry : distances.entrySet()) {
-                        TripPattern key = entry.getKey();
-                        if (key == pattern) {
-                            continue;
-                        }
-                        P2<Double> distance = entry.getValue();
-                        P2<Double> previousDistance = previousDistances.get(key);
-                        P2<Double> nextDistance = nextDistances.get(key);
-                        if (distance.getFirst() == 0) {
-                            local = false;
-                        } else if (previousDistance == null) {
-                            if (nextDistance == null
-                                    || nextDistance.getFirst() + MAX_SUBOPTIMAL_DISTANCE >= distance
-                                            .getFirst()
-                                    || nextDistance.getSecond() + MAX_SUBOPTIMAL_DISTANCE >= distance
-                                            .getSecond()) {
-                                local = false;
-                                break;
-                            }
-                        } else if (distance.getFirst() <= previousDistance.getFirst()
-                                + MAX_SUBOPTIMAL_DISTANCE
-                                && (nextDistance == null || nextDistance.getFirst()
-                                        + MAX_SUBOPTIMAL_DISTANCE >= distance.getFirst())) {
-                            local = false;
-                            break;
-                        } else if (distance.getSecond() <= previousDistance.getSecond()
-                                + MAX_SUBOPTIMAL_DISTANCE
-                                && (nextDistance == null || nextDistance.getSecond()
-                                        + MAX_SUBOPTIMAL_DISTANCE >= distance.getSecond())) {
-                            local = false;
-                            break;
-                        }
-                    }
-                    if (local == false) {
-                        if (transitStop.isLocal()) {
-                            nonLocal ++;
-                        }
-                        transitStop.setLocal(false);
-                    }
-                }
-            }
-            // last stop is never local
-            Stop stop = stops.get(stops.size() - 1);
-            TransitStop transitStop = getVertexForStop(stop);
-            if (transitStop.isLocal()) {
-                nonLocal ++;
-            }
-            transitStop.setLocal(false);
-
+            try{
+	            for (int i = 0; i < stops.size() - 1; ++i) {
+	                Stop stop = stops.get(i);
+	
+	                TransitStop transitStop = getVertexForStop(stop);
+	
+	                previousDistances = distances;
+	                distances = getNeighborhood(stop);
+	                HashMap<TripPattern, P2<Double>> nextDistances = null;
+	                Stop nextStop = stops.get(i + 1);
+	                nextDistances = getNeighborhood(nextStop);
+	
+	                if (previousDistances == null) {
+	                    // first stop is never local
+	                	
+	                    if (transitStop.isLocal()) {
+	                        nonLocal ++;
+	                    }
+	                    transitStop.setLocal(false);
+	                    continue;
+	                } else {
+	                    boolean local = true;
+	                    for (Entry<TripPattern, P2<Double>> entry : distances.entrySet()) {
+	                        TripPattern key = entry.getKey();
+	                        if (key == pattern) {
+	                            continue;
+	                        }
+	                        P2<Double> distance = entry.getValue();
+	                        P2<Double> previousDistance = previousDistances.get(key);
+	                        P2<Double> nextDistance = nextDistances.get(key);
+	                        if (distance.getFirst() == 0) {
+	                            local = false;
+	                        } else if (previousDistance == null) {
+	                            if (nextDistance == null
+	                                    || nextDistance.getFirst() + MAX_SUBOPTIMAL_DISTANCE >= distance
+	                                            .getFirst()
+	                                    || nextDistance.getSecond() + MAX_SUBOPTIMAL_DISTANCE >= distance
+	                                            .getSecond()) {
+	                                local = false;
+	                                break;
+	                            }
+	                        } else if (distance.getFirst() <= previousDistance.getFirst()
+	                                + MAX_SUBOPTIMAL_DISTANCE
+	                                && (nextDistance == null || nextDistance.getFirst()
+	                                        + MAX_SUBOPTIMAL_DISTANCE >= distance.getFirst())) {
+	                            local = false;
+	                            break;
+	                        } else if (distance.getSecond() <= previousDistance.getSecond()
+	                                + MAX_SUBOPTIMAL_DISTANCE
+	                                && (nextDistance == null || nextDistance.getSecond()
+	                                        + MAX_SUBOPTIMAL_DISTANCE >= distance.getSecond())) {
+	                            local = false;
+	                            break;
+	                        }
+	                    }
+	                    if (local == false) {
+	                        if (transitStop.isLocal()) {
+	                            nonLocal ++;
+	                        }
+	                        transitStop.setLocal(false);
+	                    }
+	                }
+	            }
+	            // last stop is never local
+	            Stop stop = stops.get(stops.size() - 1);
+	            TransitStop transitStop = getVertexForStop(stop);
+	            if (transitStop.isLocal()) {
+	                nonLocal ++;
+	            }
+	            transitStop.setLocal(false);
+	        } catch (NullPointerException ex){
+	    		continue;
+	    	}
         }
         _log.debug("Local stops: " + (total - nonLocal) + " / " + total);
     }
@@ -274,35 +278,41 @@ public class LocalStopFinder {
                 }
             }
             
-            if (distanceLibrary .fastDistance(fromv.getCoordinate(), origin.getCoordinate()) > LOCAL_STOP_SEARCH_RADIUS) {
-                /* we have now traveled far from the origin, so we know that anything we find
-                 * from here on out is going to be too far
-                 */
-                return patternCosts;
-            }
+            try{
+		            if (distanceLibrary .fastDistance(fromv.getCoordinate(), origin.getCoordinate()) > LOCAL_STOP_SEARCH_RADIUS) {
+		                /* we have now traveled far from the origin, so we know that anything we find
+		                 * from here on out is going to be too far
+		                 */
+		                return patternCosts;
+		            }
+		            Iterable<Edge> outgoing = fromv.getOutgoing();
+            
 
-            Iterable<Edge> outgoing = fromv.getOutgoing();
+            
 
-            for (Edge edge : outgoing) {
-
-                State v = edge.traverse(u);
-
-                // When an edge leads nowhere (as indicated by returning NULL), the iteration is
-                // over.
-                if (v == null)
-                    continue;
-
-                double dw = v.getWeight() - u.getWeight();
-                if (dw < 0)
-                    throw new NegativeWeightException(String.valueOf(dw));
-                
-                Vertex toVertex = v.getVertex();
-
-                if (closed.contains(toVertex))
-                    continue;
-
-                if (spt.add(v))
-                    queue.insert(v, v.getWeight());
+	            for (Edge edge : outgoing) {
+	
+	                State v = edge.traverse(u);
+	
+	                // When an edge leads nowhere (as indicated by returning NULL), the iteration is
+	                // over.
+	                if (v == null)
+	                    continue;
+	
+	                double dw = v.getWeight() - u.getWeight();
+	                if (dw < 0)
+	                    throw new NegativeWeightException(String.valueOf(dw));
+	                
+	                Vertex toVertex = v.getVertex();
+	
+	                if (closed.contains(toVertex))
+	                    continue;
+	
+	                if (spt.add(v))
+	                    queue.insert(v, v.getWeight());
+	            }
+            } catch (NullPointerException ex){
+            	continue;
             }
         }
 

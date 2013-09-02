@@ -36,6 +36,7 @@ import org.opentripplanner.routing.edgetype.loader.NetworkLinker;
 import org.opentripplanner.routing.graph.Graph;
 import org.opentripplanner.routing.graph.Server;
 import org.opentripplanner.routing.graph.Vertex;
+import org.opentripplanner.routing.graph.VertexComparatorFactory;
 import org.opentripplanner.routing.vertextype.RemoteTransitVertex;
 import org.opentripplanner.routing.vertextype.SharedVertex;
 import org.opentripplanner.routing.vertextype.TransitStop;
@@ -104,25 +105,40 @@ public class SharedVertexGraphBuilderImpl implements GraphBuilder {
 								stop.setLon(Double.parseDouble(element2.getAttribute("lon")));
 							String sharedVertexId = element2.getAttribute("id");
 							
-							LOG.info("sharedVertex id: " + sharedVertexId);
-
 							SharedVertex sharedVertex = null;
+							
+							
+							
+							LOG.info("sharedVertex id: " + sharedVertexId);
 							
 							if (sharedVertexId != null && !sharedVertexId.isEmpty()) {
 								//Comprobar si el vertice ya existia en el grafo
 								Collection<Vertex> vertices = graph.getVertices();
+								boolean added = false;
 								for (Vertex v : vertices) {
 									if (v instanceof TransitStop && ((TransitStop)v).getLat() == stop.getLat() && ((TransitStop)v).getLon() == stop.getLon()) {
 										sharedVertex = new SharedVertex(graph, new Stop(((TransitStop)v).getStop()) , sharedVertexId, server);
+										/* Check if it  is localStop.
+										 *    If so, the stop already exists in the graph as transit stop and a coversion is needed from TransitStop to SharedVertex.
+										 *    If not, the new stop has to be added to the graph.
+										 */
+										if (element2.getAttribute("localStop").equals("localStop"))
+											sharedVertex.setLocalStop(true);
+										
+										if (sharedVertex.isLocalStop()){
+											graph.removeVertex(v);
+										}
 										graph.addVertex(sharedVertex);
-									} else {
-										sharedVertex = new SharedVertex(graph, new Stop(stop), sharedVertexId, server);
-										graph.addVertex(sharedVertex);
+										//SharedVertex x = (SharedVertex) v;
+										added = true;
 									}
 								}
-								//Comprobar si el nodo es localStop
-								if (element2.getAttribute("localStop").equals("localStop"))
-									sharedVertex.setLocalStop(true);
+								if(!added){
+									sharedVertex = new SharedVertex(graph, new Stop(stop), sharedVertexId, server);
+									if (element2.getAttribute("localStop").equals("localStop"))
+										sharedVertex.setLocalStop(true);
+									graph.addVertex(sharedVertex);
+								}
 								
 								// 5) Añadir el objeto creado a la lista de nodos compartidos del vecino
 								server.getSharedVertexList().put(sharedVertexId, sharedVertex);
@@ -132,8 +148,8 @@ public class SharedVertexGraphBuilderImpl implements GraphBuilder {
 					// 6.1) Añadir el objeto de vecino a la lista serverList del grafo
 					graph.getServerList().put(server.getGlobalId(), server);
 					// 7) Conectar los nodos compartidos a los nodos EndPointVertex
-					NetworkLinker nl = new NetworkLinker(graph);
-					nl.createLinkage();
+					//NetworkLinker nl = new NetworkLinker(graph);
+					//nl.createLinkage();
 				}
 			}
 		} catch (ParserConfigurationException e) {

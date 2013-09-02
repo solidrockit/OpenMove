@@ -78,8 +78,8 @@ public class RetryingPathServiceImpl implements PathService {
 
     @Override
     public List<GraphPath> getPaths(RoutingRequest options) {
-
-        ArrayList<GraphPath> paths = new ArrayList<GraphPath>();
+        
+    	ArrayList<GraphPath> paths = new ArrayList<GraphPath>();
 
         // make sure the options has a routing context *before* cloning it (otherwise you get
         // orphan RoutingContexts leaving temporary edges in the graph until GC)
@@ -183,6 +183,8 @@ public class RetryingPathServiceImpl implements PathService {
         if (paths.size() == 0) {
             return null;
         }
+        // Add the remote searches result in remoteSearch attribute
+        // this.setRemoteSearch(spt.getDelegatedPaths());
         // We order the list of returned paths by the time of arrival or departure (not path duration)
         Collections.sort(paths, new PathComparator(options.isArriveBy()));
         return paths;

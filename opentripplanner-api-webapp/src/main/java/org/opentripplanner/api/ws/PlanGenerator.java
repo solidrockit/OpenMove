@@ -153,8 +153,53 @@ public class PlanGenerator {
         if (endName == null) {
             endName = tripEndVertex.getLabel();
         }
-        Place from = new Place(tripStartVertex.getX(), tripStartVertex.getY(), startName);
-        Place to = new Place(tripEndVertex.getX(), tripEndVertex.getY(), endName);
+        Place from = new Place(tripStartVertex.getX(),tripStartVertex.getY(), startName);
+        Place to = new Place(tripEndVertex.getX(),tripEndVertex.getY(), endName);
+
+        
+        /*Place from;
+        Place to;
+        String startName;
+        String endName;
+        // If exists a result in remote search
+        if(this.getRemoteSearch()!=null){
+        	/* 
+        	 * We need to know if the route begins in a local node of in a node in another server.
+        	 * Depending on this value, the departure or destination node will be get from the
+        	 * remote result.
+        	 
+        	remoteSearch = this.getRemoteSearch();
+        	if(!request.getDelegatedSearch()){
+        		/*
+        		 * The route has been generated in this server so the itinerary's origin is in
+        		 * local graph.
+        		 
+        		startName = tripStartVertex.getName();
+        		from = new Place(tripStartVertex.getX(),tripStartVertex.getY(), startName);
+        		to = remoteSearch.to;
+        		endName = "Remote End Vertex";
+        	} else {
+        		/*
+        		 * The route has been generated in another server and the destination is in
+        		 * local graph.
+        		 
+        		Vertex tripStartVertex = exemplar.getStartVertex();
+        		Vertex tripEndVertex = exemplar.getEndVertex();
+        		startName = tripStartVertex.getName();
+        		endName = tripEndVertex.getName();
+        		
+        		// Use vertex label if they don't have names
+        		if(startName==null){
+        			startName = tripStartVertex.getLabel();
+        		}
+        		if(endName==null){
+        			endName = tripEndVertex.getLabel();
+        		}
+        		from = new Place(tripStartVertex.getX(),tripStartVertex.getY(),startName);
+        		to = new Place(tripEndPlace.getX(),tripEndPlace.getY(),endPlace);
+        	}
+        }*/
+        
 
         TripPlan plan = new TripPlan(from, to, request.getDateTime());
 
@@ -178,7 +223,9 @@ public class PlanGenerator {
      * @return itinerary
      */
     private Itinerary generateItinerary(GraphPath path, boolean showIntermediateStops) {
-        Graph graph = path.getRoutingContext().graph;
+    	Graph graph = path.getRoutingContext().graph;
+    	/*RoutingContext ctx = path.getRoutingContext();
+    	Graph graph = ctx.graph;*/
         TransitIndexService transitIndex = graph.getService(TransitIndexService.class);
 
         Itinerary itinerary = makeEmptyItinerary(path);
@@ -191,6 +238,11 @@ public class PlanGenerator {
         boolean foldingElevatorLegIntoCycleLeg = false;
         PlanGenState pgstate = PlanGenState.START;
         String nextName = null;
+        /*// If the remote search belogs to the start of the route, add its legs first
+        if (ctx.getOriginServer()!=Null){
+        	itinerary = this.addRemoteLegs(path,itinerary)
+        }*/
+
         for (State state : path.states) {
             i += 1;
             Edge backEdge = state.getBackEdge();
@@ -447,6 +499,11 @@ public class PlanGenerator {
                 break;
             }
             if (leg != null) {
+            	/*
+            	// Add legs in remote search, if exist
+            	if (ctx.getDestinationServer()!=Null){
+            		itinerary = this.addRemoteLegs(path,itinerary)
+            	}*/
                 leg.distance += backEdge.getDistance();
                 Geometry edgeGeometry = backEdge.getGeometry();
                 if (edgeGeometry != null) {
@@ -478,6 +535,8 @@ public class PlanGenerator {
         itinerary.fixupDates(graph.getService(CalendarServiceData.class));
         if (itinerary.legs.size() == 0)
             throw new TrivialPathException();
+        // Adjust itinerary
+        //itinerary = adjustItinerary(path,itinerary);
         return itinerary;
     }
 
@@ -562,6 +621,34 @@ public class PlanGenerator {
         }
         return notes;
     }
+    
+    /*private Itinerary addRemoteLegs(GrapPath path, Itinerary itinerary){
+    	TripPlan remotePlan = path.getRemoteSearch();
+    	Itinerary remoteItinerary = remotePlan.itinerary();
+    	// Add to itinerary each leg in remoteItinerary
+    	for (Leg leg: remoteItinerary.leg) {
+    		itinerary.addLeg(leg);
+    	}
+    	return itinerary;
+    }
+    
+    private Itinerary adjustItinerary(GraphPath path, Itinerary itinerary){
+    	// If a remote result exists
+    	if (path.getRemoteSearch()!=null){
+    		TripPlan remotePath = path.getRemoteSearch();
+    		Itinerary remoteItinerary = remotePath.itinerary;
+    		itinerary.duration += remoteItinerary.duration;
+    		itinerary.walktime += remoteItinerary.walktime;
+    		itinerary.transitTime += remoteItinerary.transitTime;
+    		itinerary.waitingTime += remoteItinerary.waitingTime;
+    		itinerary.walkDistance += remoteItinerary.walkDistance;
+    		itinerary.elevationLost += remoteItinerary.elevationLost;
+    		itinerary.elevationGained += remoteItinerary.elevationGained;
+    		itinerary.transfers += remoteItinerary.transfers;
+    		Fare();
+    	}
+    	return itinerary;
+    }*/
 
     /**
      * Adjusts an Itinerary's elevation fields from an elevation profile

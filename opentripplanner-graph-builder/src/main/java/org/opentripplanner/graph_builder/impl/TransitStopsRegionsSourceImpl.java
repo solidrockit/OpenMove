@@ -50,16 +50,7 @@ public class TransitStopsRegionsSourceImpl implements RegionsSource {
     	List<Envelope> regions = new ArrayList<Envelope>();
 
         for (Vertex gv : task.getGraph().getVertices()) {
-            if (gv instanceof TransitStop) {
-                Coordinate c = gv.getCoordinate();
-                Envelope env = new Envelope(c);
-                double meters_per_degree_lon_here =  
-                    METERS_PER_DEGREE_LAT * Math.cos(Math.toRadians(c.y));
-                env.expandBy(distance / meters_per_degree_lon_here,  
-                        distance / METERS_PER_DEGREE_LAT);
-                regions.add(env);
-            }
-            else if (gv instanceof SharedVertex) {
+        	if (gv instanceof SharedVertex) {
                 if (((SharedVertex) gv).isLocalStop()) {
                     Coordinate c = gv.getCoordinate();
                     Envelope env = new Envelope(c);
@@ -69,6 +60,15 @@ public class TransitStopsRegionsSourceImpl implements RegionsSource {
                             distance / METERS_PER_DEGREE_LAT);
                     regions.add(env);
                 }
+            }
+        	else if (gv instanceof TransitStop) {
+                Coordinate c = gv.getCoordinate();
+                Envelope env = new Envelope(c);
+                double meters_per_degree_lon_here =  
+                    METERS_PER_DEGREE_LAT * Math.cos(Math.toRadians(c.y));
+                env.expandBy(distance / meters_per_degree_lon_here,  
+                        distance / METERS_PER_DEGREE_LAT);
+                regions.add(env);
             }
         }
 
