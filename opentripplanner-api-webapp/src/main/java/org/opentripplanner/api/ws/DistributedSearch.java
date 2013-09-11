@@ -35,7 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.sun.jersey.api.spring.Autowire;
 
-@Path("/dsearch") //NOTE - /ws/dsearch is the full path -- see web.xml
+@Path("") //NOTE - /ws/dsearch is the full path -- see web.xml
 @XmlRootElement
 @Autowire
 public class DistributedSearch  extends SearchResource {
