@@ -33,6 +33,7 @@ import org.onebusaway.gtfs.model.Stop;
 import org.opentripplanner.graph_builder.services.GraphBuilder;
 import org.opentripplanner.gtfs.GtfsLibrary;
 import org.opentripplanner.routing.edgetype.loader.NetworkLinker;
+import org.opentripplanner.routing.graph.Edge;
 import org.opentripplanner.routing.graph.Graph;
 import org.opentripplanner.routing.graph.Server;
 import org.opentripplanner.routing.graph.Vertex;
@@ -117,39 +118,30 @@ public class SharedVertexGraphBuilderImpl implements GraphBuilder {
 								boolean added = false;
 								for (Vertex v : vertices) {
 									if (v instanceof TransitStop && ((TransitStop)v).getLat() == stop.getLat() && ((TransitStop)v).getLon() == stop.getLon()) {
+										Collection<Edge> outs= v.getOutgoing();
+										Collection<Edge> ins = v.getIncoming();
 										sharedVertex = new SharedVertex(graph, new Stop(((TransitStop)v).getStop()) , sharedVertexId, server);
+										for (Edge edge : ins){
+											// Add incoming edges to the new sharedVertex
+											sharedVertex.addIncoming(edge);
+										}
+										for (Edge edge : outs){
+											// Add outgoing edges to the new sharedVertex
+											sharedVertex.addOutgoing(edge);
+										}
 										/* Check if it  is localStop.
-										 *    If so, the stop already exists in the graph as transit stop and a coversion is needed from TransitStop to SharedVertex.
-										 *    If not, the new stop has to be added to the graph.
+										 *    If so, the sharedVertex must be connected with the nearby streets with NetworkLinker.
+										 *    If not, the sharedVertex nearby osm nodes must not be downloaded.
 										 */
 										if (element2.getAttribute("localStop").equals("localStop"))
 											sharedVertex.setLocalStop(true);
 										
-										if (sharedVertex.isLocalStop()){
-											graph.removeVertex(v);
-										}
-										graph.addVertex(sharedVertex);
-										//SharedVertex x = (SharedVertex) v;
-										added = true;
+										
 									}
 								}
-								if(!added){
-									sharedVertex = new SharedVertex(graph, new Stop(stop), sharedVertexId, server);
-									if (element2.getAttribute("localStop").equals("localStop"))
-										sharedVertex.setLocalStop(true);
-									graph.addVertex(sharedVertex);
-								}
-								
-								// 5) Añadir el objeto creado a la lista de nodos compartidos del vecino
-								server.getSharedVertexList().put(sharedVertexId, sharedVertex);
 							}
 						}
 					}					
-					// 6.1) Añadir el objeto de vecino a la lista serverList del grafo
-					graph.getServerList().put(server.getGlobalId(), server);
-					// 7) Conectar los nodos compartidos a los nodos EndPointVertex
-					//NetworkLinker nl = new NetworkLinker(graph);
-					//nl.createLinkage();
 				}
 			}
 		} catch (ParserConfigurationException e) {
