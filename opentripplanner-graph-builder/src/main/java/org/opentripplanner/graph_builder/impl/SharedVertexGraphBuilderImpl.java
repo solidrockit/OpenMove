@@ -115,31 +115,41 @@ public class SharedVertexGraphBuilderImpl implements GraphBuilder {
 							if (sharedVertexId != null && !sharedVertexId.isEmpty()) {
 								//Comprobar si el vertice ya existia en el grafo
 								Collection<Vertex> vertices = graph.getVertices();
-								boolean added = false;
+								Vertex exists = null;
 								for (Vertex v : vertices) {
 									if (v instanceof TransitStop && ((TransitStop)v).getLat() == stop.getLat() && ((TransitStop)v).getLon() == stop.getLon()) {
-										Collection<Edge> outs= v.getOutgoing();
-										Collection<Edge> ins = v.getIncoming();
-										sharedVertex = new SharedVertex(graph, new Stop(((TransitStop)v).getStop()) , sharedVertexId, server);
-										for (Edge edge : ins){
-											// Add incoming edges to the new sharedVertex
-											sharedVertex.addIncoming(edge);
-										}
-										for (Edge edge : outs){
-											// Add outgoing edges to the new sharedVertex
-											sharedVertex.addOutgoing(edge);
-										}
-										/* Check if it  is localStop.
-										 *    If so, the sharedVertex must be connected with the nearby streets with NetworkLinker.
-										 *    If not, the sharedVertex nearby osm nodes must not be downloaded.
-										 */
-										if (element2.getAttribute("localStop").equals("localStop"))
-											sharedVertex.setLocalStop(true);
-										
-										
-									}
+										exists = v;
+									} 
 								}
-							}
+								if (exists instanceof TransitStop){
+									// This transitStop (v) is going to be replaced by sharedVertex
+									Collection<Edge> outs= exists.getOutgoing();
+									Collection<Edge> ins = exists.getIncoming();
+									sharedVertex = new SharedVertex(graph, new Stop(((TransitStop)exists).getStop()) , sharedVertexId, server);
+									for (Edge edge : ins){
+										// Add incoming edges to the new sharedVertex
+										sharedVertex.addIncoming(edge);
+									}
+									for (Edge edge : outs){
+										// Add outgoing edges to the new sharedVertex
+										sharedVertex.addOutgoing(edge);
+									}
+									/* Check if it  is localStop.
+									 *    If so, the sharedVertex must be connected with the nearby streets with NetworkLinker.
+									 *    If not, the sharedVertex nearby osm nodes must not be downloaded.
+									 */
+									if (element2.getAttribute("localStop").equals("localStop"))
+										sharedVertex.setLocalStop(true);
+								} else {
+									// This sharedVertex is a new addition to the graph
+									sharedVertex = new SharedVertex(graph, stop , sharedVertexId, server);
+									if (element2.getAttribute("localStop").equals("localStop"))
+										sharedVertex.setLocalStop(true);
+									else
+										sharedVertex.setLocalStop(false);
+									graph.addVertex(sharedVertex);
+								}	
+							} 
 						}
 					}					
 				}
