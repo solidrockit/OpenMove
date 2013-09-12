@@ -115,10 +115,10 @@ public class DistributedSearch  extends SearchResource {
           if (serverList!= null && !serverList.isEmpty()) {
               for (Map.Entry<String, Server> server : serverList.entrySet()) {
                   remoteServer = (Server)server.getValue();
-                   if (remoteServer.isNeighbour()) {      
+                  if (remoteServer.isNeighbour()) {
                       i++;
-                  }
-              }   
+                  }      
+              }
           }
           }catch (Exception e) {
               PlannerError error = new PlannerError(e);

@@ -87,6 +87,7 @@ public class SharedVertexGraphBuilderImpl implements GraphBuilder {
 					server.setServiceUrl(element.getAttribute("serviceUrl"));
 					server.setUrl(element.getAttribute("url"));	
 					serverList.put(server.getGlobalId(), server);
+					Map<String,SharedVertex> sharedVertexList = server.getSharedVertexList();
 					
 					LOG.info("neighbour id: " + server.getId());
 					
@@ -142,6 +143,7 @@ public class SharedVertexGraphBuilderImpl implements GraphBuilder {
 									 */
 									if (element2.getAttribute("localStop").equals("localStop"))
 										sharedVertex.setLocalStop(true);
+									sharedVertexList.put(sharedVertex.getLabel(), sharedVertex);
 								} else {
 									// This sharedVertex is a new addition to the graph
 									sharedVertex = new SharedVertex(graph, stop , sharedVertexId, server);
@@ -150,10 +152,12 @@ public class SharedVertexGraphBuilderImpl implements GraphBuilder {
 									else
 										sharedVertex.setLocalStop(false);
 									graph.addVertex(sharedVertex);
+									sharedVertexList.put(sharedVertex.getLabel(), sharedVertex);
 								}	
 							} 
 						}
-					}					
+					}
+					server.setSharedVertexList(sharedVertexList);
 				}
 				graph.setServerList(serverList);
 			}
