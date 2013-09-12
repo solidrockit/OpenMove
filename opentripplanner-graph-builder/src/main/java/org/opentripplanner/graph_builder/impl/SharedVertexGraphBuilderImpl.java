@@ -73,7 +73,8 @@ public class SharedVertexGraphBuilderImpl implements GraphBuilder {
 			db = dbf.newDocumentBuilder();
 			
 			Document document = db.parse(sharedVertexFile.getAbsolutePath());
-			NodeList nodeList = document.getElementsByTagName("server");			
+			NodeList nodeList = document.getElementsByTagName("server");	
+			HashMap<String, Server> serverList = new HashMap();
 			// 2) Iterar la lista de servidores y crear un objeto de tipo Server por cada uno
 			if (nodeList != null && nodeList.getLength() > 0) {
 				for (int i = 0; i < nodeList.getLength(); i++) {
@@ -84,7 +85,8 @@ public class SharedVertexGraphBuilderImpl implements GraphBuilder {
 					server.setId(element.getAttribute("id"));
 					server.setName(element.getAttribute("name"));
 					server.setServiceUrl(element.getAttribute("serviceUrl"));
-					server.setUrl(element.getAttribute("url"));				
+					server.setUrl(element.getAttribute("url"));	
+					serverList.put(server.getGlobalId(), server);
 					
 					LOG.info("neighbour id: " + server.getId());
 					
@@ -153,6 +155,7 @@ public class SharedVertexGraphBuilderImpl implements GraphBuilder {
 						}
 					}					
 				}
+				graph.setServerList(serverList);
 			}
 		} catch (ParserConfigurationException e) {
 			throw new SharedVertexException();
