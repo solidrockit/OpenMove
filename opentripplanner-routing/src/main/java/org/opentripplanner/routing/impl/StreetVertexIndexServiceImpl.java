@@ -290,7 +290,7 @@ public class StreetVertexIndexServiceImpl implements StreetVertexIndexService {
             Server server;
             HttpClient client = new DefaultHttpClient();
             String result = "";
-            String ws = "/opentripplanner-api-webapp/ws/dsearch/getVertexForPlace";
+            String ws = "/opentripplanner-api-webapp/ws/getVertexForPlace";
             String params = "?location=" + coordinate;
             for (String key : serverList.keySet()) {
                 server = (Server)serverList.get(key);

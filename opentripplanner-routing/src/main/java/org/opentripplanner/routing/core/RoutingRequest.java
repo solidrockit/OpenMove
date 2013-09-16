@@ -310,7 +310,7 @@ public class RoutingRequest implements Cloneable, Serializable {
         walkSpeed = 1.33; // 1.33 m/s ~ 3mph, avg. human speed
         bikeSpeed = 5; // 5 m/s, ~11 mph, a random bicycling speed
         carSpeed = 15; // 15 m/s, ~35 mph, a random driving speed
-        this.setSearchInNeighbour(false);
+        this.setSearchInNeighbour(true);
         setModes(new TraverseModeSet(new TraverseMode[] { TraverseMode.WALK, TraverseMode.TRANSIT }));
         bannedSharedVertex = new ArrayList<SharedVertex>();
         delegatedSearch = false;
