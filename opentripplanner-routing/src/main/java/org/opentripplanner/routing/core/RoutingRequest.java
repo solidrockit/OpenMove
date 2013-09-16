@@ -97,6 +97,8 @@ public class RoutingRequest implements Cloneable, Serializable {
     private double walkSpeed;
     private double bikeSpeed;
     private double carSpeed;
+    // Whether stops should be searched also in neighbouring OTP servers or not
+    private boolean searchInNeighbour=false;
 
     private Locale locale = new Locale("en", "US");
 
@@ -308,6 +310,7 @@ public class RoutingRequest implements Cloneable, Serializable {
         walkSpeed = 1.33; // 1.33 m/s ~ 3mph, avg. human speed
         bikeSpeed = 5; // 5 m/s, ~11 mph, a random bicycling speed
         carSpeed = 15; // 15 m/s, ~35 mph, a random driving speed
+        this.setSearchInNeighbour(false);
         setModes(new TraverseModeSet(new TraverseMode[] { TraverseMode.WALK, TraverseMode.TRANSIT }));
         bannedSharedVertex = new ArrayList<SharedVertex>();
         delegatedSearch = false;
@@ -334,7 +337,12 @@ public class RoutingRequest implements Cloneable, Serializable {
     	this();
         this.optimize = optimize;
     	this.setModes(modeSet);
-    }    
+    }
+    
+    public RoutingRequest(boolean searchInNeighbour) {
+    	this();
+        this.setSearchInNeighbour(searchInNeighbour);
+    }
 
     
     /* ACCESSOR METHODS */
@@ -891,5 +899,13 @@ public class RoutingRequest implements Cloneable, Serializable {
     
     public boolean isSharedVertexBanned(SharedVertex sharedVertex) {
     	return bannedSharedVertex.contains(sharedVertex);
+    }
+    
+    public void setSearchInNeighbour(boolean searchInNeighbour){
+    	this.searchInNeighbour = searchInNeighbour;
+    }
+    
+    public boolean getSearchInNeighbour(){
+    	return this.searchInNeighbour;
     }
 }
