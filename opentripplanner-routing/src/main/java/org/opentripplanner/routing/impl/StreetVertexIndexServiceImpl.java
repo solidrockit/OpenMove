@@ -499,29 +499,7 @@ public class StreetVertexIndexServiceImpl implements StreetVertexIndexService {
     public Vertex getVertexForPlace(NamedPlace place, RoutingRequest options) {
         return getVertexForPlace(place, options, null);
     }
-
-    public Vertex getVertexForPlace(NamedPlace place, RoutingRequest options,Vertex other, Boolean searchInNeighbors) {
-        if (place == null || place.place == null) {
-            return null;
-        }
-
-        Matcher matcher = _latLonPattern.matcher(place.place);
-        if (matcher.matches()) {
-            double lat = Double.parseDouble(matcher.group(1));
-            double lon = Double.parseDouble(matcher.group(4));
-            Coordinate location = new Coordinate(lon, lat);
-            if (other instanceof StreetLocation) {
-                return getClosestVertex(location, place.name, options,
-                        ((StreetLocation) other).getExtra(),searchInNeighbors);
-            } else {
-                return getClosestVertex(location, place.name, options,searchInNeighbors);
-            }
-        }
-
-        // did not match lat/lon, interpret place as a vertex label.
-        // this should probably only be used in tests.
-        return graph.getVertex(place.place);
-    }
+    
     /**
      * @param other: non-null when another vertex has already been found. When the from vertex has
      * already been made/found, that vertex is passed in when finding/creating the to vertex. 
