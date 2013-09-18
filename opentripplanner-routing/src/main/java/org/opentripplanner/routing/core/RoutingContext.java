@@ -107,18 +107,27 @@ public class RoutingContext implements Cloneable {
                           Vertex from, Vertex to, boolean findPlaces) {
         this.opt = traverseOptions;
         this.graph = graph;
+        this.distributedSearch = false;
+        this.originFromVertex = null;
+        this.finalToVertex = null;
         
         if (findPlaces) {
             // normal mode, search for vertices based on fromPlace and toPlace
             if ( ! opt.batch || opt.arriveBy) {
                 // non-batch mode, or arriveBy batch mode: we need a to vertex
                 toVertex = graph.streetIndex.getVertexForPlace(opt.getToPlace(), opt);
+                if (this.isVertexremote(toVertex)) {
+                    toVertex = this.getSharedVertexForRouting(this.getFinalServer(),true);
+                }
             } else {
                 toVertex = null;
             }
             if ( ! opt.batch || ! opt.arriveBy) {
                 // non-batch mode, or depart-after batch mode: we need a from vertex
-                fromVertex = graph.streetIndex.getVertexForPlace(opt.getFromPlace(), opt, toVertex);                
+                fromVertex = graph.streetIndex.getVertexForPlace(opt.getFromPlace(), opt, toVertex);
+                if (this.isVertexremote(fromVertex)) {
+                    fromVertex = this.getSharedVertexForRouting(this.getOriginServer(),false);
+                }
             } else {
                 fromVertex = null;
             }
