@@ -15,7 +15,9 @@ package org.opentripplanner.routing.impl;
 
 import static org.opentripplanner.common.IterableLibrary.filter;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -27,9 +29,21 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
 import lombok.Getter;
 import lombok.Setter;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.opentripplanner.common.IterableLibrary;
@@ -52,6 +66,7 @@ import org.opentripplanner.routing.services.StreetVertexIndexService;
 import org.opentripplanner.routing.vertextype.IntersectionVertex;
 import org.opentripplanner.routing.vertextype.StreetVertex;
 import org.opentripplanner.routing.vertextype.TransitStop;
+import org.opentripplanner.routing.vertextype.RemoteStreetVertex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -289,26 +304,58 @@ public class StreetVertexIndexServiceImpl implements StreetVertexIndexService {
             Map<String, Server> serverList = graph.getServerList();
             Server server;
             HttpClient client = new DefaultHttpClient();
-            String result = "";
+            String result;
             String ws = "/opentripplanner-api-webapp/ws/getVertexForPlace";
-            String params = "?location=" + coordinate;
-            for (String key : serverList.keySet()) {
-                server = (Server)serverList.get(key);
-                String url = server.getServiceUrl() + ws + params;
-                try {
-                  result = Http.get(url).use(client).header("Accept", "application/xml").header("Keep-Alive","timeout=60, max=100").charset("UTF-8").followRedirects(true).asString();
-                  // TODO:  tratar el resultado...
-                  
-                  
-                } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                        return null;
-                }
+            String params = "?location=" + coordinate.y+","+coordinate.x;
+            RemoteStreetVertex rsv = null;
+            DocumentBuilder db;
+      
+            try {
+            	db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+	            for (String key : serverList.keySet()) {
+	                server = (Server)serverList.get(key);
+	                String url = server.getServiceUrl() + ws + params;
+	                
+	                  result = Http.get(url).use(client).header("Accept", "application/xml").header("Keep-Alive","timeout=60, max=100").charset("UTF-8").followRedirects(true).asString();
+	                  
+	                  InputSource input = new InputSource(new StringReader(result));
+	                  Document document = db.parse(input);
+	                  double x=0,y=0;
+	                  String label="";
+	                  Element elem = (Element)document.getFirstChild();
+	                  Element elem2 = (Element)document.getFirstChild();
+	                  String nodeName;
+	                  NodeList listNode = elem2.getChildNodes();
+	                  int nodes = listNode.getLength();
+	                  for (int i = 0; i < listNode.getLength(); i++){
+	                	  Element element = (Element) listNode.item(i);
+	                	  nodeName = element.getNodeName();
+	                	  if (nodeName=="label"){
+	                		  label = element.getTextContent();
+	                	  } else if (nodeName=="x"){
+	                		  x = Double.parseDouble(element.getTextContent());
+	                	  } else if (nodeName=="y"){
+	                		  y = Double.parseDouble(element.getTextContent());
+	                	  } 
+	                  }
+	                  Coordinate coord = new Coordinate(x,y);
+	                  rsv = new RemoteStreetVertex(graph, label, coord, label+"_remote", server);
+	                  return rsv;
+	                  
+	            }
+            } catch (ParserConfigurationException e) {
+            	e.printStackTrace();
+                return null;
+            } catch (SAXException e) {
+             	e.printStackTrace();
+                return null;
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                return null;
             }
-            
-            
-        }
+                
+         }
         
         return closestVertex;
     }

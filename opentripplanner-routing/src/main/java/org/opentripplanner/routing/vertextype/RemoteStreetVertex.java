@@ -23,11 +23,11 @@ import com.vividsolutions.jts.geom.Coordinate;
  * This includes both vertices representing intersections or points (IntersectionVertices) 
  * and Elevator*Vertices.
  */
-public abstract class RemoteStreetVertex extends StreetVertex {
+public class RemoteStreetVertex extends StreetVertex {
 
     private Server neighbour;
-
-	public RemoteStreetVertex(Graph g, String label, Coordinate coord,
+    
+    public RemoteStreetVertex(Graph g, String label, Coordinate coord,
 			String streetName, Server neighbour) {
 		super(g, label, coord, streetName);
 		this.neighbour = neighbour;
