@@ -35,7 +35,7 @@ public class MultiShortestPathTree extends AbstractShortestPathTree {
 
     private Map<Vertex, List<State>> stateSets;
     
-    private TripPlan delegatedPathResults;
+    private List<TripPlan> delegatedPathResults;
 
     public MultiShortestPathTree(RoutingRequest options) {
         super(options);
@@ -134,7 +134,7 @@ public class MultiShortestPathTree extends AbstractShortestPathTree {
      * 
      * @return
      */
-    public TripPlan getDelegatedPaths() {
+    public List<TripPlan> getDelegatedPaths() {
         return this.delegatedPathResults;
     }
     
@@ -142,7 +142,7 @@ public class MultiShortestPathTree extends AbstractShortestPathTree {
      * 
      * @param pathResults
      */
-    public void setDelegatedPaths(TripPlan pathResults) {
+    public void setDelegatedPaths(List<TripPlan> pathResults) {
         this.delegatedPathResults = pathResults;
     }
 

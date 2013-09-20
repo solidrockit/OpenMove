@@ -117,10 +117,14 @@ public class RetryingPathServiceImpl implements PathService {
             long subsearchBeginTime = System.currentTimeMillis();
             
             LOG.debug("BEGIN SUBSEARCH");
+            // SPT will have the delegatedPaths list populated after this call
+            // Modify getShortestPathTree in GenericAStar to set that
             ShortestPathTree spt = sptService.getShortestPathTree(currOptions, timeout);
             if (spt == null) // timeout or other fail
                 break;
-            List<GraphPath> somePaths = spt.getPaths(); //IGUAL INTENTO RETORNAR EL SPT y con el hago getPaths().
+            // Each GraphPath will have the remoteSearch TripPlan set (if its the case)
+            // Modify getPaths in AbstractShortestPathTree to do so
+            List<GraphPath> somePaths = spt.getPaths();
             LOG.debug("END SUBSEARCH ({} msec of {} msec total)", 
                     System.currentTimeMillis() - subsearchBeginTime,
                     System.currentTimeMillis() - searchBeginTime);
@@ -183,8 +187,6 @@ public class RetryingPathServiceImpl implements PathService {
         if (paths.size() == 0) {
             return null;
         }
-        // Add the remote searches result in remoteSearch attribute
-        // this.setRemoteSearch(spt.getDelegatedPaths());
         // We order the list of returned paths by the time of arrival or departure (not path duration)
         Collections.sort(paths, new PathComparator(options.isArriveBy()));
         return paths;
