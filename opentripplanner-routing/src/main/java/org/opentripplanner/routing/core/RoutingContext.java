@@ -14,9 +14,12 @@
 package org.opentripplanner.routing.core;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Iterator;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
@@ -117,7 +120,11 @@ public class RoutingContext implements Cloneable {
                 // non-batch mode, or arriveBy batch mode: we need a to vertex
                 toVertex = graph.streetIndex.getVertexForPlace(opt.getToPlace(), opt);
                 if (this.isVertexremote(toVertex)) {
-                    toVertex = this.getSharedVertexForRouting(this.getFinalServer(),true);
+                	finalToVertex = toVertex;
+                	SharedVertex sharedVertexRouting = this.getSharedVertexForRouting(this.getFinalServer(),true);
+                	opt.setTo(sharedVertexRouting.getY()+","+sharedVertexRouting.getX());
+                	opt.setToName("");
+                	toVertex = graph.streetIndex.getVertexForPlace(opt.getToPlace(), opt);
                 }
             } else {
                 toVertex = null;
@@ -126,7 +133,11 @@ public class RoutingContext implements Cloneable {
                 // non-batch mode, or depart-after batch mode: we need a from vertex
                 fromVertex = graph.streetIndex.getVertexForPlace(opt.getFromPlace(), opt, toVertex);
                 if (this.isVertexremote(fromVertex)) {
-                    fromVertex = this.getSharedVertexForRouting(this.getOriginServer(),false);
+                	originFromVertex = fromVertex;
+                	SharedVertex sharedVertexRouting = this.getSharedVertexForRouting(this.getOriginServer(),false);
+                    opt.setTo(sharedVertexRouting.getY()+","+sharedVertexRouting.getX());
+                	opt.setToName("");
+                	fromVertex = graph.streetIndex.getVertexForPlace(opt.getFromPlace(), opt);
                 }
             } else {
                 fromVertex = null;
@@ -223,6 +234,11 @@ public class RoutingContext implements Cloneable {
 				if (finalToVertex instanceof RemoteTransitVertex) finalServer = ((RemoteTransitVertex)finalToVertex).getNeighbour();
 				else if (finalToVertex instanceof RemoteStreetVertex) finalServer = ((RemoteStreetVertex)finalToVertex).getNeighbour();
 		}
+		/*if (toVertex != null)
+		{
+				if (toVertex instanceof RemoteTransitVertex) finalServer = ((RemoteTransitVertex)toVertex).getNeighbour();
+				else if (toVertex instanceof RemoteStreetVertex) finalServer = ((RemoteStreetVertex)toVertex).getNeighbour();
+		}*/
 		return finalServer;
 	}
 	
@@ -230,9 +246,15 @@ public class RoutingContext implements Cloneable {
 		SharedVertex node = null;
 		if (neighbour.isNeighbour())
 		{
-			do { //do while sharedvertex is not banned
-				node = neighbour.getSharedVertexList().entrySet().iterator().next().getValue();
-			} while (!opt.isSharedVertexBanned(node));
+			Map<String,SharedVertex> list = neighbour.getSharedVertexList();
+			node = neighbour.getSharedVertexList().entrySet().iterator().next().getValue();
+			Iterator<Entry<String, SharedVertex>> it = neighbour.getSharedVertexList().entrySet().iterator();
+			node = it.next().getValue();
+			while(node!=null) { //do while sharedvertex is not banned
+				if(!opt.isSharedVertexBanned(node))
+					break;
+				node = it.next().getValue();
+			}
 			
 			if (updateToVertex) {
 				this.toVertex = node;
@@ -241,7 +263,7 @@ public class RoutingContext implements Cloneable {
 				this.fromVertex = node;
 				this.origin = node;
 			}				
-		} //else Algoritmo MOSCA - MIS
+		} //else Algoritmo MOSCA - MIS*
 		return node;
 	}
 	
