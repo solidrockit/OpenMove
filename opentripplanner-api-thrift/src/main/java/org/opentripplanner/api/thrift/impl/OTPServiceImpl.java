@@ -114,7 +114,7 @@ public class OTPServiceImpl implements OTPService.Iface {
         Coordinate c = new LatLngExtension(req.getLocation().getLat_lng()).toCoordinate();
         // NOTE(flamholz): We don't currently provide a name.
         // I guess this would speed things up somewhat?
-        Vertex closest = streetVertexIndex.getClosestVertex(c, null, rr);
+        Vertex closest = streetVertexIndex.getClosestVertex(c, null, rr, false);
 
         FindNearestVertexResponse res = new FindNearestVertexResponse();
         res.setNearest_vertex(new GraphVertexExtension(closest));

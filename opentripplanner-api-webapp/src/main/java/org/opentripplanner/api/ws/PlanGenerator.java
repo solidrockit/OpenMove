@@ -155,13 +155,13 @@ public class PlanGenerator {
         Place to = new Place(tripEndVertex.getX(),tripEndVertex.getY(), endName);
         
         // If exists a result in remote search
-        if(exemplar.getRemoteSearch()!=null){
+        if(!exemplar.getRemoteSearches().isEmpty()){
         	/* 
         	 * We need to know if the route begins in a local node of in a node in another server.
         	 * Depending on this value, the departure or destination node will be get from the
         	 * remote result.
         	 * */      	 
-        	TripPlan remoteSearch = exemplar.getRemoteSearch();
+        	TripPlan remoteSearch = exemplar.getRemoteSearches().get(0); //REVISAR, PUEDEN SER 2 (UNO PARA TO Y OTRO PARA FROM)
         	if(!request.getDelegatedSearch()){
         		//The route has been generated in this server so the itinerary's origin is in local graph.
         		from = new Place(tripStartVertex.getX(),tripStartVertex.getY(), startName);
@@ -600,7 +600,7 @@ public class PlanGenerator {
     }
     
     private Itinerary addRemoteLegs(GraphPath path, Itinerary itinerary){
-    	TripPlan remotePlan = path.getRemoteSearch();
+    	TripPlan remotePlan = path.getRemoteSearches().get(0);
     	Itinerary remoteItinerary = remotePlan.itinerary.get(0); //remotePlans only return one path - itinerary
     	// Add to itinerary each leg in remoteItinerary
     	for (Leg leg: remoteItinerary.legs) {
@@ -611,8 +611,8 @@ public class PlanGenerator {
     
     private Itinerary adjustItinerary(GraphPath path, Itinerary itinerary){
     	// If a remote result exists
-    	if (path.getRemoteSearch() != null){
-    		TripPlan remotePath = path.getRemoteSearch();
+    	if (!path.getRemoteSearches().isEmpty()){
+    		TripPlan remotePath = path.getRemoteSearches().get(0);
     		Itinerary remoteItinerary = remotePath.itinerary.get(0);
     		itinerary.duration += remoteItinerary.duration;
     		itinerary.transitTime += remoteItinerary.transitTime;

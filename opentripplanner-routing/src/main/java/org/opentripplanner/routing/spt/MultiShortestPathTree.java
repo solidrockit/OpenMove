@@ -15,8 +15,10 @@ package org.opentripplanner.routing.spt;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -72,6 +74,23 @@ public class MultiShortestPathTree extends AbstractShortestPathTree {
         }
         states.add(newState);
         return true;
+    }
+    
+    @Override
+    public List<GraphPath> getPaths(Vertex dest, boolean optimize) {
+        List<? extends State> stateList = getStates(dest);
+        if (stateList == null)
+            return Collections.emptyList();
+        List<GraphPath> ret = new LinkedList<GraphPath>();
+        for (State s : stateList) {
+            if (s.isFinal() && s.allPathParsersAccept())
+            {
+            	GraphPath gp = new GraphPath(s, optimize);
+            	gp.setRemoteSearches(delegatedPathResults);
+                ret.add(gp);
+            }
+        }
+        return ret;
     }
 
 	@Override
@@ -130,18 +149,10 @@ public class MultiShortestPathTree extends AbstractShortestPathTree {
         return allStates;
     }
     
-    /**
-     * 
-     * @return
-     */
     public List<TripPlan> getDelegatedPaths() {
         return this.delegatedPathResults;
     }
     
-    /**
-     * 
-     * @param pathResults
-     */
     public void setDelegatedPaths(List<TripPlan> pathResults) {
         this.delegatedPathResults = pathResults;
     }

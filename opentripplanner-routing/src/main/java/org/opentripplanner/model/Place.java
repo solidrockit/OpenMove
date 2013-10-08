@@ -95,14 +95,15 @@ public class Place {
 * @return
 */
     //TODO remove or fix!
-    @XmlElement
-    @Element(required=false)
+
     String getGeometry() {
         return Constants.GEO_JSON_POINT + lon + "," + lat + Constants.GEO_JSON_TAIL;
     }
     
-    /*@Element(required=false)
-    public String geometry = this.getGeometry();*/
+    @XmlElement
+    @JsonSerialize
+    @Element(required=false)
+    public String geometry = this.getGeometry();
 
     public Place() {
     }

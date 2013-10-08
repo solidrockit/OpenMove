@@ -116,5 +116,5 @@ public interface ShortestPathTree {
 
     /** Visit a vertex after it has been settled */
     public void postVisit(State u);
-    
+        
 }

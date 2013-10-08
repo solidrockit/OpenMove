@@ -323,9 +323,8 @@ public class StreetVertexIndexServiceImpl implements StreetVertexIndexService {
 	                  double x=0,y=0;
 	                  String label="";
 	                  Element elem = (Element)document.getFirstChild();
-	                  Element elem2 = (Element)document.getFirstChild();
 	                  String nodeName;
-	                  NodeList listNode = elem2.getChildNodes();
+	                  NodeList listNode = elem.getChildNodes();
 	                  int nodes = listNode.getLength();
 	                  for (int i = 0; i < listNode.getLength(); i++){
 	                	  Element element = (Element) listNode.item(i);
@@ -338,9 +337,11 @@ public class StreetVertexIndexServiceImpl implements StreetVertexIndexService {
 	                		  y = Double.parseDouble(element.getTextContent());
 	                	  } 
 	                  }
-	                  Coordinate coord = new Coordinate(x,y);
-	                  rsv = new RemoteStreetVertex(graph, label, coord, label+"_remote", server);
-	                  return rsv;
+	                  if (!label.equals("unknown")) {
+		                  Coordinate coord = new Coordinate(x,y);
+		                  rsv = new RemoteStreetVertex(graph, label, coord, label+"_remote", server);
+		                  return rsv;
+	                  }
 	                  
 	            }
             } catch (ParserConfigurationException e) {

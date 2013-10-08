@@ -114,8 +114,8 @@ public class Planner extends RoutingResource {
         		
         		respuesta = remoteTrip.requestPlan(requestremota);	
         		plan = respuesta.getPlan();
-        		return plan;
-        		*/
+        		return plan;*/
+        		
             }});
     }
 

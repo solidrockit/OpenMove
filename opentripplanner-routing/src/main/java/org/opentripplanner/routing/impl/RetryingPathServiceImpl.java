@@ -118,7 +118,6 @@ public class RetryingPathServiceImpl implements PathService {
             
             LOG.debug("BEGIN SUBSEARCH");
             // SPT will have the delegatedPaths list populated after this call
-            // Modify getShortestPathTree in GenericAStar to set that
             ShortestPathTree spt = sptService.getShortestPathTree(currOptions, timeout);
             if (spt == null) // timeout or other fail
                 break;

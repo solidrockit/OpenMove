@@ -101,8 +101,8 @@ public class RoutingContext implements Cloneable {
     
     //For distributed searches
     private boolean distributedSearch;
-    private Vertex originFromVertex;
-    private Vertex finalToVertex;
+    public Vertex originFromVertex;
+    public Vertex finalToVertex;
     
     /* CONSTRUCTORS */
     
@@ -123,7 +123,7 @@ public class RoutingContext implements Cloneable {
                 	finalToVertex = toVertex;
                 	SharedVertex sharedVertexRouting = this.getSharedVertexForRouting(this.getFinalServer(),true);
                 	opt.setTo(sharedVertexRouting.getY()+","+sharedVertexRouting.getX());
-                	opt.setToName("");
+                	opt.setToName(sharedVertexRouting.getName());
                 	toVertex = graph.streetIndex.getVertexForPlace(opt.getToPlace(), opt);
                 }
             } else {
@@ -136,7 +136,7 @@ public class RoutingContext implements Cloneable {
                 	originFromVertex = fromVertex;
                 	SharedVertex sharedVertexRouting = this.getSharedVertexForRouting(this.getOriginServer(),false);
                     opt.setTo(sharedVertexRouting.getY()+","+sharedVertexRouting.getX());
-                	opt.setToName("");
+                	opt.setToName(sharedVertexRouting.getName());
                 	fromVertex = graph.streetIndex.getVertexForPlace(opt.getFromPlace(), opt);
                 }
             } else {
@@ -247,11 +247,11 @@ public class RoutingContext implements Cloneable {
 		if (neighbour.isNeighbour())
 		{
 			Map<String,SharedVertex> list = neighbour.getSharedVertexList();
-			node = neighbour.getSharedVertexList().entrySet().iterator().next().getValue();
+			//node = neighbour.getSharedVertexList().entrySet().iterator().next().getValue();
 			Iterator<Entry<String, SharedVertex>> it = neighbour.getSharedVertexList().entrySet().iterator();
 			node = it.next().getValue();
 			while(node!=null) { //do while sharedvertex is not banned
-				if(!opt.isSharedVertexBanned(node))
+				if(!opt.isSharedVertexBanned(node) && node.getName().contains("Estacion"))
 					break;
 				node = it.next().getValue();
 			}

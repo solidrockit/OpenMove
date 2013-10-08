@@ -13,6 +13,7 @@
 
 package org.opentripplanner.routing.spt;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -47,7 +48,7 @@ public class GraphPath {
     private RoutingContext rctx;
     
     // Need to restore
-    private TripPlan remoteSearch;
+    private List<TripPlan> remoteSearches;
 
     /**
      * Construct a GraphPath based on the given state by following back-edge fields all the way back
@@ -67,7 +68,7 @@ public class GraphPath {
     public GraphPath(State s, boolean optimize) {
         this.rctx = s.getContext();
         this.back = s.getOptions().isArriveBy();
-        this.remoteSearch = null;
+        this.remoteSearches = new ArrayList<TripPlan>();
         
         /* Put path in chronological order, and optimize as necessary */
         State lastState;
@@ -216,12 +217,12 @@ public class GraphPath {
         return rctx;
     }
     
-    public TripPlan getRemoteSearch(){
-    	return this.remoteSearch;
+    public List<TripPlan> getRemoteSearches(){
+    	return this.remoteSearches;
     }
     
-    public void setRemoteSearch(TripPlan remoteSearch){
-    	this.remoteSearch = remoteSearch;
+    public void setRemoteSearches(List<TripPlan> remoteSearches){
+    	this.remoteSearches = remoteSearches;
     }
 
 }

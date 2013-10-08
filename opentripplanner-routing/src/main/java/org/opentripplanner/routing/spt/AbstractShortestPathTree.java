@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.opentripplanner.model.TripPlan;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.RoutingRequest;
 import org.opentripplanner.routing.graph.Vertex;
@@ -51,7 +52,9 @@ public abstract class AbstractShortestPathTree implements ShortestPathTree {
         List<GraphPath> ret = new LinkedList<GraphPath>();
         for (State s : stateList) {
             if (s.isFinal() && s.allPathParsersAccept())
+            {
                 ret.add(new GraphPath(s, optimize));
+            }
         }
         return ret;
     }

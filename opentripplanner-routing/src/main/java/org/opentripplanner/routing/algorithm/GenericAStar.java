@@ -13,11 +13,14 @@
 
 package org.opentripplanner.routing.algorithm;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.opentripplanner.common.pqueue.BinHeap;
 import org.opentripplanner.common.pqueue.OTPPriorityQueue;
 import org.opentripplanner.common.pqueue.OTPPriorityQueueFactory;
+import org.opentripplanner.model.TripPlan;
 import org.opentripplanner.routing.algorithm.strategies.RemainingWeightHeuristic;
 import org.opentripplanner.routing.algorithm.strategies.SearchTerminationStrategy;
 import org.opentripplanner.routing.algorithm.strategies.SkipTraverseResultStrategy;
@@ -32,6 +35,8 @@ import org.opentripplanner.routing.spt.BasicShortestPathTree;
 import org.opentripplanner.routing.spt.MultiShortestPathTree;
 import org.opentripplanner.routing.spt.ShortestPathTree;
 import org.opentripplanner.routing.spt.ShortestPathTreeFactory;
+import org.opentripplanner.routing.vertextype.SharedVertex;
+import org.opentripplanner.routing.vertextype.TransitStop;
 import org.opentripplanner.util.DateUtils;
 import org.opentripplanner.util.monitoring.MonitoringStore;
 import org.opentripplanner.util.monitoring.MonitoringStoreFactory;
@@ -175,6 +180,52 @@ public class GenericAStar implements SPTService { // maybe this should be wrappe
                     break;
             // TODO AMB: Replace isFinal with bicycle conditions in BasicPathParser
             } else if (!options.batch && u_vertex == rctx.target && u.isFinal() && u.allPathParsersAccept()) {
+            	
+            	//Local search finished, proceed with remote searches if needed
+            	List<TripPlan> delegatedPaths = new ArrayList<TripPlan>();
+            	//From is a remote shared vertex
+            	if (rctx.isVertexremote(rctx.originFromVertex))
+            	{
+            		TransitStop ts = (TransitStop)rctx.fromVertex;
+            		SharedVertex sv = new SharedVertex(rctx.graph, ts.getStop());
+            		sv.setNeighbour(rctx.getOriginServer());
+            		RoutingRequest rr = options.clone();
+            		
+            		rr.setTo(rctx.fromVertex.getY() + "," + rctx.fromVertex.getX());
+            		rr.setToName(rctx.fromVertex.getName());
+            		rr.setFrom(rctx.originFromVertex.getY() + "," + rctx.originFromVertex.getX());
+            		rr.setFromName(rctx.originFromVertex.getName());
+            		rr.numItineraries = 1;
+            		
+            		//Remote request for routing
+            		TripPlan remotePath = sv.sendRequestToNeighbour(rr);
+            		delegatedPaths.add(remotePath);
+            	}      	
+            	//To is a remote shared vertex
+            	if (rctx.isVertexremote(rctx.finalToVertex))
+            	{
+            		TransitStop ts = (TransitStop)rctx.toVertex;
+            		SharedVertex sv = new SharedVertex(rctx.graph, ts.getStop());
+            		sv.setNeighbour(rctx.getFinalServer());
+            		RoutingRequest rr = options.clone();
+            		
+            		rr.setFrom(rctx.toVertex.getY() + "," + rctx.toVertex.getX());
+            		rr.setFromName(rctx.toVertex.getName());
+            		rr.setTo(rctx.finalToVertex.getY() + "," + rctx.finalToVertex.getX());
+            		rr.setToName(rctx.finalToVertex.getName());
+            		rr.numItineraries = 1;
+            		
+            		//Remote request for routing
+            		TripPlan remotePath = sv.sendRequestToNeighbour(rr);
+            		delegatedPaths.add(remotePath);
+            	}  
+            	
+            	if (rctx.isVertexremote(rctx.originFromVertex) || rctx.isVertexremote(rctx.finalToVertex)) {
+            		MultiShortestPathTree mspt = (MultiShortestPathTree)spt;
+            		mspt.setDelegatedPaths(delegatedPaths);
+            		return mspt;
+            	}
+            	
                 LOG.debug("total vertices visited {}", nVisited);
                 storeMemory();
                 return spt;
