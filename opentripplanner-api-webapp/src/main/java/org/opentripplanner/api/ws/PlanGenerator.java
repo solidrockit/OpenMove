@@ -155,24 +155,27 @@ public class PlanGenerator {
         Place to = new Place(tripEndVertex.getX(),tripEndVertex.getY(), endName);
         
         // If exists a result in remote search
-        if(!exemplar.getRemoteSearches().isEmpty()){
-        	/* 
-        	 * We need to know if the route begins in a local node of in a node in another server.
-        	 * Depending on this value, the departure or destination node will be get from the
-        	 * remote result.
-        	 * */      	 
-        	TripPlan remoteSearch = exemplar.getRemoteSearches().get(0); //REVISAR, PUEDEN SER 2 (UNO PARA TO Y OTRO PARA FROM)
-        	if(!request.getDelegatedSearch()){
-        		//The route has been generated in this server so the itinerary's origin is in local graph.
-        		from = new Place(tripStartVertex.getX(),tripStartVertex.getY(), startName);
-        		to = remoteSearch.to;
-        		if (to.name == null) to.name = "Remote End Vertex";
-        	} else {
-        		//The route has been generated in another server and the destination is in local graph.
-        		from = remoteSearch.from;
-        		if (from.name == null) from.name = "Remote Start Vertex";
-        		to = new Place(tripEndVertex.getX(),tripEndVertex.getY(), endName);
-        	}
+        List<TripPlan> remoteSearches = exemplar.getRemoteSearches();
+        if(remoteSearches!=null){
+	        if(!exemplar.getRemoteSearches().isEmpty()){
+	        	/* 
+	        	 * We need to know if the route begins in a local node of in a node in another server.
+	        	 * Depending on this value, the departure or destination node will be get from the
+	        	 * remote result.
+	        	 * */      	 
+	        	TripPlan remoteSearch = exemplar.getRemoteSearches().get(0); //REVISAR, PUEDEN SER 2 (UNO PARA TO Y OTRO PARA FROM)
+	        	if(!request.getDelegatedSearch()){
+	        		//The route has been generated in this server so the itinerary's origin is in local graph.
+	        		from = new Place(tripStartVertex.getX(),tripStartVertex.getY(), startName);
+	        		to = remoteSearch.to;
+	        		if (to.name == null) to.name = "Remote End Vertex";
+	        	} else {
+	        		//The route has been generated in another server and the destination is in local graph.
+	        		from = remoteSearch.from;
+	        		if (from.name == null) from.name = "Remote Start Vertex";
+	        		to = new Place(tripEndVertex.getX(),tripEndVertex.getY(), endName);
+	        	}
+	        }
         }
         
         TripPlan plan = new TripPlan(from, to, request.getDateTime());
@@ -611,16 +614,19 @@ public class PlanGenerator {
     
     private Itinerary adjustItinerary(GraphPath path, Itinerary itinerary){
     	// If a remote result exists
-    	if (!path.getRemoteSearches().isEmpty()){
-    		TripPlan remotePath = path.getRemoteSearches().get(0);
-    		Itinerary remoteItinerary = remotePath.itinerary.get(0);
-    		itinerary.duration += remoteItinerary.duration;
-    		itinerary.transitTime += remoteItinerary.transitTime;
-    		itinerary.waitingTime += remoteItinerary.waitingTime;
-    		itinerary.walkDistance += remoteItinerary.walkDistance;
-    		itinerary.elevationLost += remoteItinerary.elevationLost;
-    		itinerary.elevationGained += remoteItinerary.elevationGained;
-    		itinerary.transfers += remoteItinerary.transfers;
+    	List<TripPlan> remoteSearches = path.getRemoteSearches();
+    	if (remoteSearches!=null){
+	    	if (!remoteSearches.isEmpty()){
+	    		TripPlan remotePath = path.getRemoteSearches().get(0);
+	    		Itinerary remoteItinerary = remotePath.itinerary.get(0);
+	    		itinerary.duration += remoteItinerary.duration;
+	    		itinerary.transitTime += remoteItinerary.transitTime;
+	    		itinerary.waitingTime += remoteItinerary.waitingTime;
+	    		itinerary.walkDistance += remoteItinerary.walkDistance;
+	    		itinerary.elevationLost += remoteItinerary.elevationLost;
+	    		itinerary.elevationGained += remoteItinerary.elevationGained;
+	    		itinerary.transfers += remoteItinerary.transfers;
+	    	}
     	}
     	return itinerary;
     }
