@@ -103,6 +103,7 @@ public class RoutingContext implements Cloneable {
     private boolean distributedSearch;
     public Vertex originFromVertex;
     public Vertex finalToVertex;
+    public SharedVertex sharedVertex;
     
     /* CONSTRUCTORS */
     
@@ -124,6 +125,7 @@ public class RoutingContext implements Cloneable {
                 	SharedVertex sharedVertexRouting = this.getSharedVertexForRouting(this.getFinalServer(),true);
                 	opt.setTo(sharedVertexRouting.getY()+","+sharedVertexRouting.getX());
                 	opt.setToName(sharedVertexRouting.getName());
+                	this.sharedVertex = sharedVertexRouting;
                 	toVertex = graph.streetIndex.getVertexForPlace(opt.getToPlace(), opt);
                 }
             } else {
@@ -137,6 +139,7 @@ public class RoutingContext implements Cloneable {
                 	SharedVertex sharedVertexRouting = this.getSharedVertexForRouting(this.getOriginServer(),false);
                     opt.setTo(sharedVertexRouting.getY()+","+sharedVertexRouting.getX());
                 	opt.setToName(sharedVertexRouting.getName());
+                	this.sharedVertex = sharedVertexRouting;
                 	fromVertex = graph.streetIndex.getVertexForPlace(opt.getFromPlace(), opt);
                 }
             } else {

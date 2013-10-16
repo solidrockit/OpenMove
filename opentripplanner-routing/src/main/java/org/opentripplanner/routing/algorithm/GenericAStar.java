@@ -204,7 +204,7 @@ public class GenericAStar implements SPTService { // maybe this should be wrappe
             	//To is a remote shared vertex
             	if (rctx.isVertexremote(rctx.finalToVertex))
             	{
-            		TransitStop ts = (TransitStop)rctx.toVertex;
+            		TransitStop ts = (TransitStop)rctx.sharedVertex;
             		SharedVertex sv = new SharedVertex(rctx.graph, ts.getStop());
             		sv.setNeighbour(rctx.getFinalServer());
             		RoutingRequest rr = options.clone();
