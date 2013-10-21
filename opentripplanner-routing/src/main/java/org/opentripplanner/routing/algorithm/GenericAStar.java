@@ -15,7 +15,10 @@ package org.opentripplanner.routing.algorithm;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
+
+import javax.print.attribute.standard.DateTimeAtCompleted;
 
 import org.opentripplanner.common.pqueue.BinHeap;
 import org.opentripplanner.common.pqueue.OTPPriorityQueue;
@@ -145,8 +148,8 @@ public class GenericAStar implements SPTService { // maybe this should be wrappe
                 // This is distinct from the empty list of paths which implies that a result may still
                 // be found by retrying with altered options (e.g. max walk distance)
                 //Commented out by Aitzol
-                //storeMemory();
-                //return null; // throw timeout exception
+                storeMemory();
+                return null; // throw timeout exception
             }
 
             // get the lowest-weight state in the queue
@@ -191,6 +194,9 @@ public class GenericAStar implements SPTService { // maybe this should be wrappe
             		sv.setNeighbour(rctx.getOriginServer());
             		RoutingRequest rr = options.clone();
             		
+            		Date actualizarTiempos = new Date(u.getElapsedTime()*1000 + rr.getDateTime().getTime());
+            		
+            		rr.setDateTime(actualizarTiempos);	
             		rr.setTo(rctx.fromVertex.getY() + "," + rctx.fromVertex.getX());
             		rr.setToName(rctx.fromVertex.getName());
             		rr.setFrom(rctx.originFromVertex.getY() + "," + rctx.originFromVertex.getX());
@@ -209,6 +215,9 @@ public class GenericAStar implements SPTService { // maybe this should be wrappe
             		sv.setNeighbour(rctx.getFinalServer());
             		RoutingRequest rr = options.clone();
             		
+            		Date actualizarTiempos = new Date(u.getElapsedTime()*1000 + rr.getDateTime().getTime());
+            		
+            		rr.setDateTime(actualizarTiempos);
             		rr.setFrom(rctx.toVertex.getY() + "," + rctx.toVertex.getX());
             		rr.setFromName(rctx.toVertex.getName());
             		rr.setTo(rctx.finalToVertex.getY() + "," + rctx.finalToVertex.getX());

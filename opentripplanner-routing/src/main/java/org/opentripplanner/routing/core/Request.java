@@ -227,6 +227,8 @@ public class Request implements RequestInf {
     *            the dateTime to set
     */
    public void setDateTime(Date dateTime) {
+       paramPush(DATE, DateUtils.formatDate("MM/dd/yyyy", dateTime, TimeZone.getDefault()));
+       paramPush(TIME, DateUtils.formatDate("hh:mma", dateTime, TimeZone.getDefault()));
        this.dateTime = dateTime;
    }
 

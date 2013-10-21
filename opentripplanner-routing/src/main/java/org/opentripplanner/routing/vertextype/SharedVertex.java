@@ -13,6 +13,7 @@
 
 package org.opentripplanner.routing.vertextype;
 
+import java.util.Date;
 import java.util.List;
 import java.net.URLEncoder;
 
@@ -89,6 +90,7 @@ public class SharedVertex extends TransitStop {
 		
 		remoteRequest.setFrom(options.from);
 		remoteRequest.setTo(options.to);		
+		remoteRequest.setDateTime(options.getDateTime());
 		remoteRequest.setOptimize(options.optimize);
 		remoteRequest.setMaxWalkDistance(840.0);
 		remoteRequest.setModes(options.modes);

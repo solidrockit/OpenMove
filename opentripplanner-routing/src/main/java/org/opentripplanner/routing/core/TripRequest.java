@@ -74,7 +74,7 @@ public class TripRequest {
 		//String u = "http://130.206.138.15:8080/opentripplanner-api-webapp/ws/plan?mode=TRANSIT,WALK&optimize=QUICK&maxWalkDistance=840&toPlace=42.873857,-2.679784&fromPlace=42.835412,-2.670686";
 		//String u = "http://go.cutr.usf.edu:8083/opentripplanner-api-webapp/ws/plan?fromPlace=28.066192823902,-82.416927819827&toPlace=28.064072155861,-82.41109133301&arr=Depart&min=QUICK&maxWalkDistance=7600&itinID=1&submit&date=06/07/2011&time=11:34%20am";
 		
-		String u = neighbour.getServiceUrl() + "/opentripplanner-api-webapp/ws/plan?" + params;
+		String u = neighbour.getServiceUrl() + "/opentripplanner-api-webapp/ws/plan" + params;
 		
 		//Below fixes a bug where the New York OTP server will whine
 		//if doesn't get the parameter for intermediate places

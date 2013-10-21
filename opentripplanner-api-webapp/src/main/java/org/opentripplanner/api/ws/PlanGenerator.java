@@ -614,6 +614,7 @@ public class PlanGenerator {
     
     private Itinerary adjustItinerary(GraphPath path, Itinerary itinerary){
     	// If a remote result exists
+    	RoutingContext ctx = path.getRoutingContext();
     	List<TripPlan> remoteSearches = path.getRemoteSearches();
     	if (remoteSearches!=null){
 	    	if (!remoteSearches.isEmpty()){
@@ -626,6 +627,9 @@ public class PlanGenerator {
 	    		itinerary.elevationLost += remoteItinerary.elevationLost;
 	    		itinerary.elevationGained += remoteItinerary.elevationGained;
 	    		itinerary.transfers += remoteItinerary.transfers;
+	    		
+	    		itinerary.startTime = ctx.getOriginServer() != null ? remoteItinerary.startTime : itinerary.startTime;
+	    		itinerary.endTime = ctx.getFinalServer() != null ? remoteItinerary.endTime : itinerary.endTime;
 	    	}
     	}
     	return itinerary;
