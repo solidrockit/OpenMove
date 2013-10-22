@@ -133,12 +133,12 @@ public class RoutingContext implements Cloneable {
             }
             if ( ! opt.batch || ! opt.arriveBy) {
                 // non-batch mode, or depart-after batch mode: we need a from vertex
-                fromVertex = graph.streetIndex.getVertexForPlace(opt.getFromPlace(), opt, toVertex);
+                fromVertex = graph.streetIndex.getVertexForPlace(opt.getFromPlace(), opt);
                 if (this.isVertexremote(fromVertex)) {
                 	originFromVertex = fromVertex;
                 	SharedVertex sharedVertexRouting = this.getSharedVertexForRouting(this.getOriginServer(),false);
-                    opt.setTo(sharedVertexRouting.getY()+","+sharedVertexRouting.getX());
-                	opt.setToName(sharedVertexRouting.getName());
+                    opt.setFrom(sharedVertexRouting.getY()+","+sharedVertexRouting.getX());
+                	opt.setFromName(sharedVertexRouting.getName());
                 	this.sharedVertex = sharedVertexRouting;
                 	fromVertex = graph.streetIndex.getVertexForPlace(opt.getFromPlace(), opt);
                 }
