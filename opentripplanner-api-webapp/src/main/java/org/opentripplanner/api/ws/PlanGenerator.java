@@ -158,21 +158,21 @@ public class PlanGenerator {
         
         // If exists a result in remote search
         List<TripPlan> remoteSearches = exemplar.getRemoteSearches();
-        if(remoteSearches!=null){
-	        if(!exemplar.getRemoteSearches().isEmpty()){
+        if(remoteSearches != null){
+	        if(!remoteSearches.isEmpty() && remoteSearches.get(0) != null){
 	        	/* 
 	        	 * We need to know if the route begins in a local node of in a node in another server.
 	        	 * Depending on this value, the departure or destination node will be get from the
 	        	 * remote result.
 	        	 * */      	 
 	        	TripPlan remoteSearch = exemplar.getRemoteSearches().get(0); //REVISAR, PUEDEN SER 2 (UNO PARA TO Y OTRO PARA FROM)
-	        	if(!request.getDelegatedSearch()){
-	        		//The route has been generated in this server so the itinerary's origin is in local graph.
+	        	if(request.rctx.finalToVertex != null){
+	        		//The route has been generated in another server and the destination is in local graph.	        		
 	        		from = new Place(tripStartVertex.getX(),tripStartVertex.getY(), startName);
 	        		to = remoteSearch.to;
 	        		if (to.name == null) to.name = "Remote End Vertex";
 	        	} else {
-	        		//The route has been generated in another server and the destination is in local graph.
+	        		//The route has been generated in this server so the itinerary's origin is in local graph.
 	        		from = remoteSearch.from;
 	        		if (from.name == null) from.name = "Remote Start Vertex";
 	        		to = new Place(tripEndVertex.getX(),tripEndVertex.getY(), endName);
@@ -204,7 +204,7 @@ public class PlanGenerator {
             		String lat2=df.format(remoteVertex.getY());
             		String lon1=df.format(leg.from.lon);
             		String lon2=df.format(remoteVertex.getX());
-            		if (lat1.equals(lat2) && lon1.equals(lon2))
+            		//if (lat1.equals(lat2) && lon1.equals(lon2))
             			plan.addItinerary(itinerary);
             	} else {
             		Iterator<Leg> it = itinerary.legs.iterator();
@@ -216,7 +216,7 @@ public class PlanGenerator {
             		String lat2=df.format(remoteVertex.getY());
             		String lon1=df.format(leg.to.lon);
             		String lon2=df.format(remoteVertex.getX());
-            		if (lat1.equals(lat2) && lon1.equals(lon2))
+            		//if (lat1.equals(lat2) && lon1.equals(lon2))
             			plan.addItinerary(itinerary);
             	}
             }          
@@ -662,7 +662,7 @@ public class PlanGenerator {
     	RoutingContext ctx = path.getRoutingContext();
     	List<TripPlan> remoteSearches = path.getRemoteSearches();
     	if (remoteSearches!=null){
-	    	if (!remoteSearches.isEmpty()){
+	    	if (!remoteSearches.isEmpty() && remoteSearches.get(0) != null){
 	    		TripPlan remotePath = path.getRemoteSearches().get(0);
 	    		Itinerary remoteItinerary = null;
 	    		try{

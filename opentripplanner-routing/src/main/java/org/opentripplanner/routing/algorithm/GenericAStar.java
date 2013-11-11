@@ -189,14 +189,14 @@ public class GenericAStar implements SPTService { // maybe this should be wrappe
             	//From is a remote shared vertex
             	if (rctx.isVertexremote(rctx.originFromVertex))
             	{
-            		TransitStop ts = (TransitStop)rctx.fromVertex;
+            		TransitStop ts = (TransitStop)rctx.sharedVertex;
             		SharedVertex sv = new SharedVertex(rctx.graph, ts.getStop());
             		sv.setNeighbour(rctx.getOriginServer());
             		RoutingRequest rr = options.clone();
             		
-            		Date actualizarTiempos = new Date(u.getElapsedTime()*1000 + rr.getDateTime().getTime());
+            		//Date actualizarTiempos = new Date(u.getElapsedTime()*1000 + rr.getDateTime().getTime());
             		
-            		rr.setDateTime(actualizarTiempos);	
+            		//rr.setDateTime(actualizarTiempos);	
             		rr.setTo(rctx.fromVertex.getY() + "," + rctx.fromVertex.getX());
             		rr.setToName(rctx.fromVertex.getName());
             		rr.setFrom(rctx.originFromVertex.getY() + "," + rctx.originFromVertex.getX());
@@ -226,9 +226,7 @@ public class GenericAStar implements SPTService { // maybe this should be wrappe
             		
             		//Remote request for routing
             		TripPlan remotePath = sv.sendRequestToNeighbour(rr);
-            		if(remotePath!=null){
-            			delegatedPaths.add(remotePath);
-            		}
+            		delegatedPaths.add(remotePath);
             	}  
             	
             	if (rctx.isVertexremote(rctx.originFromVertex) || rctx.isVertexremote(rctx.finalToVertex)) {
@@ -357,4 +355,3 @@ public class GenericAStar implements SPTService { // maybe this should be wrappe
         this.traverseVisitor = traverseVisitor;
     }
 }
-

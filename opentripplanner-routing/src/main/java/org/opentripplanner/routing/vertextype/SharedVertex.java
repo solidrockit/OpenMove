@@ -47,7 +47,7 @@ public class SharedVertex extends TransitStop {
 		this.neighbour = neighbour;
 		this.localStop = false;
 	}
-    
+
 	public String getSharedId() {
 		return sharedId;
 	}
@@ -105,7 +105,7 @@ public class SharedVertex extends TransitStop {
 			return respuesta.getPlan();
 		} catch (NullPointerException e){
 			// Can't find a  remote leg
-			options.banSharedVertex(options.rctx.sharedVertex);
+			options.banSharedVertex(options.rctx.sharedVertex.getSharedId());
 			return null;
 		}
 	}

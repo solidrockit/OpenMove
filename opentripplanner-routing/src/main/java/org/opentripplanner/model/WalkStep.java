@@ -122,6 +122,7 @@ public class WalkStep {
     public List<P2<Double>> elevation;
 
     @XmlElement
+    @ElementList(required=false)
     public List<Alert> alerts;
 
     public transient double angle;

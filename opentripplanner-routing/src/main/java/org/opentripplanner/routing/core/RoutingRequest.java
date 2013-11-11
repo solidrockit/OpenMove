@@ -297,7 +297,7 @@ public class RoutingRequest implements Cloneable, Serializable {
     private boolean walkingBike;
     
     //SharedVertex banned nodes for local routing
-    private List<SharedVertex> bannedSharedVertex;
+    private List<String> bannedSharedVertex;
     //True if the routing search has started in a remote server
     private boolean delegatedSearch;
     
@@ -312,7 +312,7 @@ public class RoutingRequest implements Cloneable, Serializable {
         carSpeed = 15; // 15 m/s, ~35 mph, a random driving speed
         this.setSearchInNeighbour(true);
         setModes(new TraverseModeSet(new TraverseMode[] { TraverseMode.WALK, TraverseMode.TRANSIT }));
-        bannedSharedVertex = new ArrayList<SharedVertex>();
+        bannedSharedVertex = new ArrayList<String>();
         delegatedSearch = false;
         bikeWalkingOptions = this;
     }
@@ -893,16 +893,20 @@ public class RoutingRequest implements Cloneable, Serializable {
     	this.delegatedSearch = delegatedSearch;
     }
     
-    public void banSharedVertex(SharedVertex sharedVertex) {
-        this.bannedSharedVertex.add(sharedVertex);
+    public void banSharedVertex(String sharedVertexId) {
+        this.bannedSharedVertex.add(sharedVertexId);
+    }
+    
+    public List<String> getBannedSharedVertexList(){
+    	return this.bannedSharedVertex;
     }
     
     public void purgeBannedSharedVertex(){
-    	this.bannedSharedVertex = new ArrayList<SharedVertex>();
+    	this.bannedSharedVertex = new ArrayList<String>();
     }
     
-    public boolean isSharedVertexBanned(SharedVertex sharedVertex) {
-    	return bannedSharedVertex.contains(sharedVertex);
+    public boolean isSharedVertexBanned(String sharedVertexId) {
+    	return this.bannedSharedVertex.contains(sharedVertexId);
     }
     
     public void setSearchInNeighbour(boolean searchInNeighbour){

@@ -18,12 +18,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.annotation.XmlElement;
+
 import org.opentripplanner.common.Message;
 import org.opentripplanner.routing.core.LocationNotAccessible;
 import org.opentripplanner.routing.error.PathNotFoundException;
 import org.opentripplanner.routing.error.TransitTimesException;
 import org.opentripplanner.routing.error.TrivialPathException;
 import org.opentripplanner.routing.error.VertexNotFoundException;
+import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,9 +45,13 @@ public class PlannerError {
         messages.put(TrivialPathException.class,    Message.TOO_CLOSE);
     }
     
+	@Element(required=false)
     private int    id;
+	@Element(required=false)
     private String msg;
+    @ElementList(name="missing",required=false)
     private List<String> missing = null;
+	@Element(required=false)
     private boolean noPath = false;
 
     /** An error where no path has been found, but no points are missing */

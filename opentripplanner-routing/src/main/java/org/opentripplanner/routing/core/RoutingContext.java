@@ -245,67 +245,41 @@ public class RoutingContext implements Cloneable {
 		return finalServer;
 	}
 	
-	public SharedVertex getSharedVertexForRouting(Server neighbour, boolean updateToVertex) {
+	public SharedVertex getSharedVertexForRouting(Server neighbour, Vertex vertex, boolean updateToVertex) {
 		SharedVertex node = null;
-		SharedVertex node2 = null;
+		SharedVertex nodeCercano = null;
+		double distancia = Double.MAX_VALUE;
 		if (neighbour.isNeighbour())
 		{
 			Map<String,SharedVertex> list = neighbour.getSharedVertexList();
 			//node = neighbour.getSharedVertexList().entrySet().iterator().next().getValue();
 			Iterator<Entry<String, SharedVertex>> it = neighbour.getSharedVertexList().entrySet().iterator();
-			node = it.next().getValue();
-			node = it.next().getValue();
-			// TODO: We need a much more better way to select a SharedNode
-			node2 = it.next().getValue();
-			if (!opt.isSharedVertexBanned(node2))
-				node = node2;
-			node2 = it.next().getValue();
-			if (!opt.isSharedVertexBanned(node2))
-				node = node2;
-			node2 = it.next().getValue();
-			if (!opt.isSharedVertexBanned(node2))
-				node = node2;
-			node2 = it.next().getValue();
-			if (!opt.isSharedVertexBanned(node2))
-				node = node2;
-			node2 = it.next().getValue();
-			if (!opt.isSharedVertexBanned(node2))
-				node = node2;
-			node2 = it.next().getValue();
-			if (!opt.isSharedVertexBanned(node2))
-				node = node2;
-			node2 = it.next().getValue();
-			if (!opt.isSharedVertexBanned(node2))
-				node = node2;
-			node2 = it.next().getValue();
-			if (!opt.isSharedVertexBanned(node2))
-				node = node2;
-			node2 = it.next().getValue();
-			if (!opt.isSharedVertexBanned(node2))
-				node = node2;
-			node2 = it.next().getValue();
-			if (!opt.isSharedVertexBanned(node2))
-				node = node2;
-			node2 = it.next().getValue();
-			if (!opt.isSharedVertexBanned(node2))
-				node = node2;
 			
+			// TODO: We need a much more better way to select a SharedNode	(distance based)
+			while (it.hasNext()) {
+				node = it.next().getValue();
+				if(!opt.isSharedVertexBanned(node.getSharedId()) && vertex.getCoordinate().distance(node.getCoordinate()) < distancia) {
+					distancia = vertex.getCoordinate().distance(node.getCoordinate());
+					nodeCercano = node;
+				}
+			}
+					
 			if (updateToVertex) {
-				this.toVertex = node;
-				this.target = node;
+				this.toVertex = nodeCercano;
+				this.target = nodeCercano;
 			} else {
-				this.fromVertex = node;
-				this.origin = node;
+				this.fromVertex = nodeCercano;
+				this.origin = nodeCercano;
 			}				
 		} //else Algoritmo MOSCA - MIS*
-		return node;
+		return nodeCercano;
 	}
 	
-	public SharedVertex updateSharedNode (boolean updateToVertex)
+	public SharedVertex updateSharedNode (Vertex vertex, boolean updateToVertex)
 	{
 		//Get the server of the routing node (origin or final node)
 		Server neighbour = updateToVertex ? this.getFinalServer() : this.getOriginServer();
-		Vertex newVertexForRouting = getSharedVertexForRouting(neighbour, updateToVertex);
+		Vertex newVertexForRouting = getSharedVertexForRouting(neighbour, vertex, updateToVertex);
 		
 		return (SharedVertex)newVertexForRouting;
 	}

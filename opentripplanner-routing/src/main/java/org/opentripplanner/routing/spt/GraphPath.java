@@ -68,7 +68,7 @@ public class GraphPath {
     public GraphPath(State s, boolean optimize) {
         this.rctx = s.getContext();
         this.back = s.getOptions().isArriveBy();
-        this.remoteSearches = new ArrayList<TripPlan>();
+        //this.remoteSearches = new ArrayList<TripPlan>();
         
         /* Put path in chronological order, and optimize as necessary */
         State lastState;
@@ -222,7 +222,7 @@ public class GraphPath {
     }
     
     public void setRemoteSearches(List<TripPlan> remoteSearches){
-    	if (!remoteSearches.isEmpty())
+    	if (remoteSearches != null && !remoteSearches.isEmpty())
     		this.remoteSearches = remoteSearches;
     }
 

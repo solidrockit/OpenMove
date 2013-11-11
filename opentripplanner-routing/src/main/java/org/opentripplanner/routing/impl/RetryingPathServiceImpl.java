@@ -21,6 +21,7 @@ import java.util.Queue;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.opentripplanner.routing.core.RoutingRequest;
+import org.opentripplanner.routing.graph.Server;
 import org.opentripplanner.routing.pathparser.BasicPathParser;
 import org.opentripplanner.routing.pathparser.NoThruTrafficPathParser;
 import org.opentripplanner.routing.pathparser.PathParser;
@@ -93,13 +94,13 @@ public class RetryingPathServiceImpl implements PathService {
 
         long searchBeginTime = System.currentTimeMillis();
         
-        // The list of options specifying various modes, banned routes, etc to try for multiple
-        // itineraries
+        // The list of options specifying various modes, banned routes, etc to try for multiple itineraries
         Queue<RoutingRequest> optionQueue = new LinkedList<RoutingRequest>();
         optionQueue.add(options);
 
         double maxWeight = Double.MAX_VALUE;
         double maxWalk = options.getMaxWalkDistance();
+        
         double initialMaxWalk = maxWalk;
         long maxTime = options.isArriveBy() ? 0 : Long.MAX_VALUE;
         RoutingRequest currOptions;
@@ -114,14 +115,14 @@ public class RetryingPathServiceImpl implements PathService {
             // SharedVertex for Distributed search
             if (currOptions.rctx.isVertexremote(currOptions.rctx.toVertex)) {
             	currOptions.rctx.finalToVertex = currOptions.rctx.toVertex;
-            	SharedVertex sharedVertexRouting = currOptions.rctx.getSharedVertexForRouting(currOptions.rctx.getFinalServer(),true);
+            	SharedVertex sharedVertexRouting = options.rctx.getSharedVertexForRouting(currOptions.rctx.getFinalServer(), currOptions.rctx.toVertex, true);
             	currOptions.setTo(sharedVertexRouting.getY()+","+sharedVertexRouting.getX());
             	currOptions.setToName(sharedVertexRouting.getName());
             	currOptions.rctx.sharedVertex = sharedVertexRouting;
             	currOptions.rctx.toVertex = currOptions.rctx.graph.streetIndex.getVertexForPlace(currOptions.getToPlace(), currOptions);
             	currOptions.rctx.target = currOptions.rctx.toVertex;
             } else if (currOptions.rctx.isVertexremote(currOptions.rctx.finalToVertex)){
-            	SharedVertex newSharedVertexRouting = currOptions.rctx.updateSharedNode(true);
+            	SharedVertex newSharedVertexRouting = options.rctx.updateSharedNode(currOptions.rctx.finalToVertex, true);
             	currOptions.setTo(newSharedVertexRouting.getY()+","+newSharedVertexRouting.getX());
                 currOptions.setToName(newSharedVertexRouting.getName());
             	currOptions.rctx.sharedVertex = newSharedVertexRouting;
@@ -132,13 +133,13 @@ public class RetryingPathServiceImpl implements PathService {
             }
             if (currOptions.rctx.isVertexremote(currOptions.rctx.fromVertex)) {
             	currOptions.rctx.originFromVertex = currOptions.rctx.fromVertex;
-            	SharedVertex sharedVertexRouting = currOptions.rctx.getSharedVertexForRouting(currOptions.rctx.getOriginServer(),false);
+            	SharedVertex sharedVertexRouting = options.rctx.getSharedVertexForRouting(currOptions.rctx.getOriginServer(), currOptions.rctx.fromVertex, false);
             	currOptions.setFrom(sharedVertexRouting.getY()+","+sharedVertexRouting.getX());
                 currOptions.setFromName(sharedVertexRouting.getName());
             	currOptions.rctx.sharedVertex = sharedVertexRouting;
             	currOptions.rctx.fromVertex = currOptions.rctx.graph.streetIndex.getVertexForPlace(currOptions.getFromPlace(), currOptions);
             } else if (currOptions.rctx.isVertexremote(currOptions.rctx.originFromVertex)){
-            	SharedVertex newSharedVertexRouting = currOptions.rctx.updateSharedNode(false);
+            	SharedVertex newSharedVertexRouting = options.rctx.updateSharedNode(currOptions.rctx.originFromVertex, false);
             	currOptions.setFrom(newSharedVertexRouting.getY()+","+newSharedVertexRouting.getX());
                 currOptions.setFromName(newSharedVertexRouting.getName());
             	currOptions.rctx.sharedVertex = newSharedVertexRouting;
@@ -150,7 +151,7 @@ public class RetryingPathServiceImpl implements PathService {
             double timeout = paths.isEmpty() ? firstPathTimeout : multiPathTimeout;
             
             // options.worstTime = maxTime;
-            //options.maxWeight = maxWeight;
+            // options.maxWeight = maxWeight;
             long subsearchBeginTime = System.currentTimeMillis();
             
             LOG.debug("BEGIN SUBSEARCH");
@@ -192,14 +193,21 @@ public class RetryingPathServiceImpl implements PathService {
                 }
             }
             if (somePaths.isEmpty()) {
-                //try again doubling maxwalk
-                if (maxWalk > initialMaxWalk * MAX_WALK_MULTIPLE || maxWalk >= Double.MAX_VALUE)
-                    break;
-                maxWalk *= 2;
-                options.banSharedVertex(options.rctx.sharedVertex);
-                optionQueue.add(currOptions);
-                LOG.debug("No paths were found.");
-                continue;
+                //try again doubling maxwalk && with other shared nodes          	
+                if (maxWalk > initialMaxWalk * MAX_WALK_MULTIPLE || maxWalk >= Double.MAX_VALUE) {              
+                	options.banSharedVertex(currOptions.rctx.sharedVertex.getSharedId());
+                	maxWalk = initialMaxWalk;
+                	optionQueue.add(currOptions);
+                	LOG.debug("No paths were found.");
+                	Server remoteServer = currOptions.rctx.isVertexremote(currOptions.rctx.finalToVertex) ? 
+                			currOptions.rctx.getFinalServer() : currOptions.rctx.getOriginServer();
+                	if (options.getBannedSharedVertexList().size() >= remoteServer.getSharedVertexList().size()) break;
+                	else continue;
+                } else {
+                	maxWalk *= 2;
+                	optionQueue.add(currOptions);
+                	continue;
+                }
             }
             for (GraphPath path : somePaths) {
                 if (!paths.contains(path)) {

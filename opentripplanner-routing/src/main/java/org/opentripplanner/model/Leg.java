@@ -229,10 +229,12 @@ public class Leg {
 */
     @XmlElement
     @JsonSerialize
+    @ElementList(name="notes",required=false)
     private List<Note> notes;
 
     @XmlElement
     @JsonSerialize
+    @ElementList(name="alerts",required=false)
     private List<Alert> alerts;
 
     @XmlAttribute
