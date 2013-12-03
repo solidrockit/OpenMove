@@ -74,7 +74,7 @@ public class Place {
 
     @XmlAttribute
     @JsonSerialize
-    @Element(required=false)
+    @Attribute(required=false)
     public String orig;
 
     @XmlAttribute

@@ -249,30 +249,29 @@ public class RoutingContext implements Cloneable {
 		SharedVertex node = null;
 		SharedVertex nodeCercano = null;
 		double distancia = Double.MAX_VALUE;
+		double distance = Double.MAX_VALUE;
+		double prevDistance = Double.MAX_VALUE;
 		if (neighbour.isNeighbour())
 		{
 			Map<String,SharedVertex> list = neighbour.getSharedVertexList();
-			//node = neighbour.getSharedVertexList().entrySet().iterator().next().getValue();
-			Iterator<Entry<String, SharedVertex>> it = neighbour.getSharedVertexList().entrySet().iterator();
-			
-			// TODO: We need a much more better way to select a SharedNode	(distance based)
-			while (it.hasNext()) {
-				node = it.next().getValue();
-				if(!opt.isSharedVertexBanned(node.getSharedId()) && vertex.getCoordinate().distance(node.getCoordinate()) < distancia) {
-					distancia = vertex.getCoordinate().distance(node.getCoordinate());
-					nodeCercano = node;
-				}
-			}
-					
-			if (updateToVertex) {
-				this.toVertex = nodeCercano;
-				this.target = nodeCercano;
-			} else {
-				this.fromVertex = nodeCercano;
-				this.origin = nodeCercano;
-			}				
+            //node = neighbour.getSharedVertexList().entrySet().iterator().next().getValue();
+            Iterator<Entry<String, SharedVertex>> it = neighbour.getSharedVertexList().entrySet().iterator();
+            node = it.next().getValue();
+            while(node!=null) { //do while sharedvertex is not banned
+                    if(node.getName().contains("Estacion"))
+                            break;
+                    node = it.next().getValue();
+            }
+            
+            if (updateToVertex) {
+                    this.toVertex = node;
+                    this.target = node;
+            } else {
+                    this.fromVertex = node;
+                    this.origin = node;
+            }			
 		} //else Algoritmo MOSCA - MIS*
-		return nodeCercano;
+		return node;
 	}
 	
 	public SharedVertex updateSharedNode (Vertex vertex, boolean updateToVertex)
