@@ -226,9 +226,7 @@ public class GenericAStar implements SPTService { // maybe this should be wrappe
             		
             		//Remote request for routing
             		TripPlan remotePath = sv.sendRequestToNeighbour(rr);
-            		if(remotePath!=null){
-            			delegatedPaths.add(remotePath);
-            		}
+            		delegatedPaths.add(remotePath);
             	}  
             	
             	if (rctx.isVertexremote(rctx.originFromVertex) || rctx.isVertexremote(rctx.finalToVertex)) {
@@ -357,4 +355,3 @@ public class GenericAStar implements SPTService { // maybe this should be wrappe
         this.traverseVisitor = traverseVisitor;
     }
 }
-

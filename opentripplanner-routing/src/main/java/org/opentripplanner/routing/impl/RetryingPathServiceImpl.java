@@ -29,7 +29,6 @@ import org.opentripplanner.routing.services.PathService;
 import org.opentripplanner.routing.services.SPTService;
 import org.opentripplanner.routing.spt.GraphPath;
 import org.opentripplanner.routing.spt.ShortestPathTree;
-import org.opentripplanner.routing.vertextype.SharedVertex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +80,6 @@ public class RetryingPathServiceImpl implements PathService {
     public List<GraphPath> getPaths(RoutingRequest options) {
         
     	ArrayList<GraphPath> paths = new ArrayList<GraphPath>();
-    	options.purgeBannedSharedVertex();
 
         // make sure the options has a routing context *before* cloning it (otherwise you get
         // orphan RoutingContexts leaving temporary edges in the graph until GC)
@@ -110,41 +108,6 @@ public class RetryingPathServiceImpl implements PathService {
                 break;
             }
             currOptions.setMaxWalkDistance(maxWalk);
-            
-            // SharedVertex for Distributed search
-            if (currOptions.rctx.isVertexremote(currOptions.rctx.toVertex)) {
-            	currOptions.rctx.finalToVertex = currOptions.rctx.toVertex;
-            	SharedVertex sharedVertexRouting = currOptions.rctx.getSharedVertexForRouting(currOptions.rctx.getFinalServer(),true);
-            	currOptions.setTo(sharedVertexRouting.getY()+","+sharedVertexRouting.getX());
-            	currOptions.setToName(sharedVertexRouting.getName());
-            	currOptions.rctx.sharedVertex = sharedVertexRouting;
-            	currOptions.rctx.toVertex = currOptions.rctx.graph.streetIndex.getVertexForPlace(currOptions.getToPlace(), currOptions);
-            	currOptions.rctx.target = currOptions.rctx.toVertex;
-            } else if (currOptions.rctx.isVertexremote(currOptions.rctx.finalToVertex)){
-            	SharedVertex newSharedVertexRouting = currOptions.rctx.updateSharedNode(true);
-            	currOptions.setTo(newSharedVertexRouting.getY()+","+newSharedVertexRouting.getX());
-                currOptions.setToName(newSharedVertexRouting.getName());
-            	currOptions.rctx.sharedVertex = newSharedVertexRouting;
-            	//currOptions.rctx.sharedVertex = null;
-            	currOptions.rctx.toVertex = currOptions.rctx.graph.streetIndex.getVertexForPlace(currOptions.getToPlace(), currOptions);
-            	currOptions.rctx.target = currOptions.rctx.toVertex;
-            	currOptions.rctx.setDistributedSearch(true);
-            }
-            if (currOptions.rctx.isVertexremote(currOptions.rctx.fromVertex)) {
-            	currOptions.rctx.originFromVertex = currOptions.rctx.fromVertex;
-            	SharedVertex sharedVertexRouting = currOptions.rctx.getSharedVertexForRouting(currOptions.rctx.getOriginServer(),false);
-            	currOptions.setFrom(sharedVertexRouting.getY()+","+sharedVertexRouting.getX());
-                currOptions.setFromName(sharedVertexRouting.getName());
-            	currOptions.rctx.sharedVertex = sharedVertexRouting;
-            	currOptions.rctx.fromVertex = currOptions.rctx.graph.streetIndex.getVertexForPlace(currOptions.getFromPlace(), currOptions);
-            } else if (currOptions.rctx.isVertexremote(currOptions.rctx.originFromVertex)){
-            	SharedVertex newSharedVertexRouting = currOptions.rctx.updateSharedNode(false);
-            	currOptions.setFrom(newSharedVertexRouting.getY()+","+newSharedVertexRouting.getX());
-                currOptions.setFromName(newSharedVertexRouting.getName());
-            	currOptions.rctx.sharedVertex = newSharedVertexRouting;
-            	currOptions.rctx.fromVertex = currOptions.rctx.graph.streetIndex.getVertexForPlace(currOptions.getFromPlace(), currOptions);
-            	currOptions.rctx.setDistributedSearch(true);
-            }
             
             // apply appropriate timeout
             double timeout = paths.isEmpty() ? firstPathTimeout : multiPathTimeout;
@@ -196,7 +159,6 @@ public class RetryingPathServiceImpl implements PathService {
                 if (maxWalk > initialMaxWalk * MAX_WALK_MULTIPLE || maxWalk >= Double.MAX_VALUE)
                     break;
                 maxWalk *= 2;
-                options.banSharedVertex(options.rctx.sharedVertex);
                 optionQueue.add(currOptions);
                 LOG.debug("No paths were found.");
                 continue;
@@ -246,4 +208,3 @@ public class RetryingPathServiceImpl implements PathService {
     }
 
 }
-

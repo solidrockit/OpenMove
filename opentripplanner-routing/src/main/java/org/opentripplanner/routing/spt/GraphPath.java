@@ -222,9 +222,7 @@ public class GraphPath {
     }
     
     public void setRemoteSearches(List<TripPlan> remoteSearches){
-    	if (!remoteSearches.isEmpty())
-    		this.remoteSearches = remoteSearches;
+    	this.remoteSearches = remoteSearches;
     }
 
 }
-

@@ -248,8 +248,9 @@ public class StreetVertexIndexServiceImpl implements StreetVertexIndexService {
         Vertex closestStop = null;
         // elsewhere options=null means no restrictions, find anything.
         // here we skip examining stops, as they are really only relevant when transit is being used
-        if (options != null && options.getModes().isTransit()) {
-            for (Vertex v : getLocalTransitStops(coordinate, 1000)) {
+        if ( options != null && options.getModes().isTransit()) {
+        	double distance = searchInNeighbours ? 10 : 1000;
+            for (Vertex v : getLocalTransitStops(coordinate, distance)) {
                 double d = distanceLibrary.distance(v.getCoordinate(), coordinate);
                 if (d < closestStopDistance) {
                     closestStopDistance = d;
@@ -299,7 +300,7 @@ public class StreetVertexIndexServiceImpl implements StreetVertexIndexService {
             //return closestStreet;
             closestVertex = closestStreet;  
         }
-        if (closestVertex == null && searchInNeighbours) {
+        if (closestVertex == null  && searchInNeighbours) {
 
             Map<String, Server> serverList = graph.getServerList();
             Server server;
@@ -591,4 +592,3 @@ public class StreetVertexIndexServiceImpl implements StreetVertexIndexService {
         return true;
     }
 }
-

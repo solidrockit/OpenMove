@@ -897,10 +897,6 @@ public class RoutingRequest implements Cloneable, Serializable {
         this.bannedSharedVertex.add(sharedVertex);
     }
     
-    public void purgeBannedSharedVertex(){
-    	this.bannedSharedVertex = new ArrayList<SharedVertex>();
-    }
-    
     public boolean isSharedVertexBanned(SharedVertex sharedVertex) {
     	return bannedSharedVertex.contains(sharedVertex);
     }
@@ -913,4 +909,3 @@ public class RoutingRequest implements Cloneable, Serializable {
     	return this.searchInNeighbour;
     }
 }
-
