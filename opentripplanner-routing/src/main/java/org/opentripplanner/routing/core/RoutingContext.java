@@ -252,51 +252,21 @@ public class RoutingContext implements Cloneable {
 		{
 			Map<String,SharedVertex> list = neighbour.getSharedVertexList();
 			//node = neighbour.getSharedVertexList().entrySet().iterator().next().getValue();
-			Iterator<Entry<String, SharedVertex>> it = neighbour.getSharedVertexList().entrySet().iterator();
-			node = it.next().getValue();
-			node = it.next().getValue();
-			// TODO: We need a much more better way to select a SharedNode
-			node2 = it.next().getValue();
-			if (!opt.isSharedVertexBanned(node2))
-				node = node2;
-			node2 = it.next().getValue();
-			if (!opt.isSharedVertexBanned(node2))
-				node = node2;
-			node2 = it.next().getValue();
-			if (!opt.isSharedVertexBanned(node2))
-				node = node2;
-			node2 = it.next().getValue();
-			if (!opt.isSharedVertexBanned(node2))
-				node = node2;
-			node2 = it.next().getValue();
-			if (!opt.isSharedVertexBanned(node2))
-				node = node2;
-			node2 = it.next().getValue();
-			if (!opt.isSharedVertexBanned(node2))
-				node = node2;
-			node2 = it.next().getValue();
-			if (!opt.isSharedVertexBanned(node2))
-				node = node2;
-			node2 = it.next().getValue();
-			if (!opt.isSharedVertexBanned(node2))
-				node = node2;
-			node2 = it.next().getValue();
-			if (!opt.isSharedVertexBanned(node2))
-				node = node2;
-			node2 = it.next().getValue();
-			if (!opt.isSharedVertexBanned(node2))
-				node = node2;
-			node2 = it.next().getValue();
-			if (!opt.isSharedVertexBanned(node2))
-				node = node2;
-			
-			if (updateToVertex) {
-				this.toVertex = node;
-				this.target = node;
-			} else {
-				this.fromVertex = node;
-				this.origin = node;
-			}				
+            Iterator<Entry<String, SharedVertex>> it = neighbour.getSharedVertexList().entrySet().iterator();
+            node = it.next().getValue();
+            while(node!=null) { //do while sharedvertex is not banned
+                    if(node.getName().contains("Estacion"))
+                            break;
+                    node = it.next().getValue();
+            }
+            
+            if (updateToVertex) {
+            	this.toVertex = node;
+            	this.target = node;
+            } else {
+            	this.fromVertex = node;
+            	this.origin = node;
+            }                        
 		} //else Algoritmo MOSCA - MIS*
 		return node;
 	}
