@@ -13,10 +13,12 @@
 
 package org.opentripplanner.api.ws;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -182,7 +184,42 @@ public class PlanGenerator {
 
         for (GraphPath path : paths) {
             Itinerary itinerary = generateItinerary(path, request.isShowIntermediateStops());
-            plan.addItinerary(itinerary);
+            if(!request.rctx.getDistributedSearch()){
+            	plan.addItinerary(itinerary);
+            } else {
+            	Vertex remoteVertex = null;
+            	Boolean remoteTo = false;
+            	if (request.rctx.finalToVertex!=null){
+            		remoteVertex =  request.rctx.finalToVertex;
+            		remoteTo=true;
+            	} else if (request.rctx.originFromVertex!=null){
+            		remoteVertex =  request.rctx.originFromVertex;
+            	}
+            	// Check if the itinerary is valid
+            	Leg leg = null;
+            	if (!remoteTo){
+            		leg = itinerary.legs.get(0);
+            		DecimalFormat df = new DecimalFormat("0.00000000000000");
+            		String lat1=df.format(leg.from.lat);
+            		String lat2=df.format(remoteVertex.getY());
+            		String lon1=df.format(leg.from.lon);
+            		String lon2=df.format(remoteVertex.getX());
+            		if (lat1.equals(lat2) && lon1.equals(lon2))
+            			plan.addItinerary(itinerary);
+            	} else {
+            		Iterator<Leg> it = itinerary.legs.iterator();
+            		while(it.hasNext()){
+            			leg=it.next();
+            		}
+            		DecimalFormat df = new DecimalFormat("0.00000000000000");
+            		String lat1=df.format(leg.to.lat);
+            		String lat2=df.format(remoteVertex.getY());
+            		String lon1=df.format(leg.to.lon);
+            		String lon2=df.format(remoteVertex.getX());
+            		if (lat1.equals(lat2) && lon1.equals(lon2))
+            			plan.addItinerary(itinerary);
+            	}
+            }          
         }
         return plan;
     }
@@ -603,13 +640,21 @@ public class PlanGenerator {
     }
     
     private Itinerary addRemoteLegs(GraphPath path, Itinerary itinerary){
-    	TripPlan remotePlan = path.getRemoteSearches().get(0);
-    	Itinerary remoteItinerary = remotePlan.itinerary.get(0); //remotePlans only return one path - itinerary
-    	// Add to itinerary each leg in remoteItinerary
-    	for (Leg leg: remoteItinerary.legs) {
-    		itinerary.addLeg(leg);
+    	try{
+	    	TripPlan remotePlan = path.getRemoteSearches().get(0);
+	    	if (remotePlan!=null){
+		    	Itinerary remoteItinerary = remotePlan.itinerary.get(0); //remotePlans only return one path - itinerary
+		    	// Add to itinerary each leg in remoteItinerary
+		    	for (Leg leg: remoteItinerary.legs) {
+		    		itinerary.addLeg(leg);
+		    	}
+	    	}
+	    	return itinerary;
+    	} catch (IndexOutOfBoundsException e){
+    		LOG.debug("Search result does not contain remote leg");
+    		return itinerary;
     	}
-    	return itinerary;
+    	
     }
     
     private Itinerary adjustItinerary(GraphPath path, Itinerary itinerary){
@@ -619,7 +664,12 @@ public class PlanGenerator {
     	if (remoteSearches!=null){
 	    	if (!remoteSearches.isEmpty()){
 	    		TripPlan remotePath = path.getRemoteSearches().get(0);
-	    		Itinerary remoteItinerary = remotePath.itinerary.get(0);
+	    		Itinerary remoteItinerary = null;
+	    		try{
+	    		remoteItinerary = remotePath.itinerary.get(0);
+	    		} catch(NullPointerException e){
+	    			return itinerary;
+	    		}
 	    		itinerary.duration += remoteItinerary.duration;
 	    		itinerary.transitTime += remoteItinerary.transitTime;
 	    		itinerary.waitingTime += remoteItinerary.waitingTime;
@@ -1122,3 +1172,4 @@ public class PlanGenerator {
     }
 
 }
+

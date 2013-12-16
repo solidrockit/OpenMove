@@ -27,6 +27,7 @@ import org.opentripplanner.routing.graph.Graph;
 import org.opentripplanner.routing.graph.Server;
 import org.opentripplanner.routing.services.PathService;
 import org.opentripplanner.routing.spt.GraphPath;
+import org.simpleframework.xml.core.ElementException;
 
 public class SharedVertex extends TransitStop {
 
@@ -97,9 +98,17 @@ public class SharedVertex extends TransitStop {
 		
 		/*remoteRequest.setDateTime(DateFormat.format("MM/dd/yy", System.currentTimeMillis()).toString(), 
 				DateFormat.format("hh:mmaa", System.currentTimeMillis()).toString());*/
-			
-		respuesta = remoteTrip.requestPlan(remoteRequest, neighbour);	
-		return respuesta.getPlan();
+	
+		respuesta = remoteTrip.requestPlan(remoteRequest, neighbour);
+		
+		try {
+			return respuesta.getPlan();
+		} catch (NullPointerException e){
+			// Can't find a  remote leg
+			options.banSharedVertex(options.rctx.sharedVertex);
+			return null;
+		}
 	}
     
 }
+

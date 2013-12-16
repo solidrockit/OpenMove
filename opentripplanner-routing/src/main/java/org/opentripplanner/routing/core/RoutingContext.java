@@ -120,28 +120,28 @@ public class RoutingContext implements Cloneable {
             if ( ! opt.batch || opt.arriveBy) {
                 // non-batch mode, or arriveBy batch mode: we need a to vertex
                 toVertex = graph.streetIndex.getVertexForPlace(opt.getToPlace(), opt);
-                if (this.isVertexremote(toVertex)) {
+                /*if (this.isVertexremote(toVertex)) {
                 	finalToVertex = toVertex;
                 	SharedVertex sharedVertexRouting = this.getSharedVertexForRouting(this.getFinalServer(),true);
                 	opt.setTo(sharedVertexRouting.getY()+","+sharedVertexRouting.getX());
                 	opt.setToName(sharedVertexRouting.getName());
                 	this.sharedVertex = sharedVertexRouting;
                 	toVertex = graph.streetIndex.getVertexForPlace(opt.getToPlace(), opt);
-                }
+                }*/
             } else {
                 toVertex = null;
             }
             if ( ! opt.batch || ! opt.arriveBy) {
                 // non-batch mode, or depart-after batch mode: we need a from vertex
                 fromVertex = graph.streetIndex.getVertexForPlace(opt.getFromPlace(), opt);
-                if (this.isVertexremote(fromVertex)) {
+                /*if (this.isVertexremote(fromVertex)) {
                 	originFromVertex = fromVertex;
                 	SharedVertex sharedVertexRouting = this.getSharedVertexForRouting(this.getOriginServer(),false);
                     opt.setFrom(sharedVertexRouting.getY()+","+sharedVertexRouting.getX());
                 	opt.setFromName(sharedVertexRouting.getName());
                 	this.sharedVertex = sharedVertexRouting;
                 	fromVertex = graph.streetIndex.getVertexForPlace(opt.getFromPlace(), opt);
-                }
+                }*/
             } else {
                 fromVertex = null;
             }
@@ -247,37 +247,37 @@ public class RoutingContext implements Cloneable {
 	
 	public SharedVertex getSharedVertexForRouting(Server neighbour, boolean updateToVertex) {
 		SharedVertex node = null;
+		SharedVertex node2 = null;
 		if (neighbour.isNeighbour())
 		{
 			Map<String,SharedVertex> list = neighbour.getSharedVertexList();
 			//node = neighbour.getSharedVertexList().entrySet().iterator().next().getValue();
-			Iterator<Entry<String, SharedVertex>> it = neighbour.getSharedVertexList().entrySet().iterator();
-			node = it.next().getValue();
-			while(node!=null) { //do while sharedvertex is not banned
-				if(!opt.isSharedVertexBanned(node) && node.getName().contains("Estacion"))
-					break;
-				node = it.next().getValue();
-			}
-			
-			if (updateToVertex) {
-				this.toVertex = node;
-				this.target = node;
-			} else {
-				this.fromVertex = node;
-				this.origin = node;
-			}				
-		} //else Algoritmo MOSCA - MIS*
-		return node;
-	}
+            Iterator<Entry<String, SharedVertex>> it = neighbour.getSharedVertexList().entrySet().iterator();
+            node = it.next().getValue();
+            while(node!=null) { //do while sharedvertex is not banned
+                    if(node.getName().contains("Estacion"))
+                            break;
+                    node = it.next().getValue();
+            }
+            
+            if (updateToVertex) {
+                    this.toVertex = node;
+                    this.target = node;
+            } else {
+                    this.fromVertex = node;
+                    this.origin = node;
+            }                        
+                } //else Algoritmo MOSCA - MIS*
+                return node;
+        }
 	
-	public void updateSharedNode (boolean updateToVertex)
+	public SharedVertex updateSharedNode (boolean updateToVertex)
 	{
 		//Get the server of the routing node (origin or final node)
 		Server neighbour = updateToVertex ? this.getFinalServer() : this.getOriginServer();
-		Vertex NewVertexForRouting = getSharedVertexForRouting(neighbour, updateToVertex);
+		Vertex newVertexForRouting = getSharedVertexForRouting(neighbour, updateToVertex);
 		
-		if (updateToVertex) finalToVertex = NewVertexForRouting;
-		else originFromVertex = NewVertexForRouting;
+		return (SharedVertex)newVertexForRouting;
 	}
 
 
@@ -344,6 +344,14 @@ public class RoutingContext implements Cloneable {
         for (Vertex v : intermediateVertices)
             nRemoved += v.removeTemporaryEdges();
         return nRemoved;
+    }
+    
+    public void setDistributedSearch(boolean distributedSearch){
+    	this.distributedSearch=distributedSearch;
+    }
+    
+    public boolean getDistributedSearch(){
+    	return this.distributedSearch;
     }
 
 }
