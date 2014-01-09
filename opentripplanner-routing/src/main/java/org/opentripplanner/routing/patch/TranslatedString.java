@@ -20,7 +20,11 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.opentripplanner.routing.core.Money;
+import org.opentripplanner.routing.core.Fare.FareType;
 import org.opentripplanner.routing.transit_index.adapters.MapAdapter;
+import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementMap;
 
 @XmlType
 public class TranslatedString implements Serializable {
@@ -28,6 +32,7 @@ public class TranslatedString implements Serializable {
 
     @XmlElement
     @XmlJavaTypeAdapter(MapAdapter.class)
+    @ElementMap(name="translations",entry="entry",key="key",inline=true,attribute=true)
     public TreeMap<String, String> translations = new TreeMap<String, String>();
 
     public TranslatedString(String language, String note) {
@@ -36,7 +41,7 @@ public class TranslatedString implements Serializable {
 
     public TranslatedString() {
     }
-
+    
     public TranslatedString(String v) {
         this(Alert.defaultLanguage, v);
     }

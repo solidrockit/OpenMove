@@ -20,6 +20,9 @@ import java.util.HashSet;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
+import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementList;
+
 @XmlType
 public class Alert implements Serializable {
     private static final long serialVersionUID = 8305126586053909836L;
@@ -27,6 +30,7 @@ public class Alert implements Serializable {
     public static final String defaultLanguage = "en";
 
     @XmlElement
+    @Element(name="translations",required=false)
     public TranslatedString alertHeaderText;
 
     @XmlElement
@@ -37,6 +41,7 @@ public class Alert implements Serializable {
 
     //null means unknown
     @XmlElement
+	@Element(required=false)
     public Date effectiveStartDate;
 
     public static HashSet<Alert> newSimpleAlertSet(String text) {

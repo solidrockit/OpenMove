@@ -16,6 +16,8 @@ package org.opentripplanner.routing.core;
 import java.text.NumberFormat;
 import java.util.Currency;
 
+import org.simpleframework.xml.Element;
+
 /**
  * <strong>Fare support is very, very preliminary.</strong>
  *
@@ -34,6 +36,7 @@ public class Money implements Comparable<Money> {
 
     public Money() {}
     
+    @Element(required=false)
     public Money(WrappedCurrency currency, int cents) {
         this.currency = currency;
         this.cents = cents;

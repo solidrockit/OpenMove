@@ -15,13 +15,18 @@ package org.opentripplanner.routing.core;
 
 import java.util.HashMap;
 
+import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementList;
+import org.simpleframework.xml.ElementMap;
+
 /**
  * <p>
  * Fare is a set of fares for different classes of users.
  * </p>
  */
 public class Fare {
-
+	
+	@Element(required=false)
     public static enum FareType {
         regular, student, senior, tram, special
     }
@@ -29,6 +34,7 @@ public class Fare {
     /**
      * A mapping from {@link FareType} to {@link Money}.
      */
+	@ElementMap(name="fare" ,key="FareType",keyType=FareType.class,valueType=Money.class,attribute=true,inline=false)
     public HashMap<FareType, Money> fare;
 
     public Fare() {
@@ -38,6 +44,7 @@ public class Fare {
     public void addFare(FareType fareType, WrappedCurrency currency, int cents) {
         fare.put(fareType, new Money(currency, cents));
     }
+
 
     public Money getFare(FareType type) {
         return fare.get(type);
