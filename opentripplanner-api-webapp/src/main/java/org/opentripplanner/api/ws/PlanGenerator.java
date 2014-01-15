@@ -13,8 +13,12 @@
 
 package org.opentripplanner.api.ws;
 
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -158,21 +162,21 @@ public class PlanGenerator {
         
         // If exists a result in remote search
         List<TripPlan> remoteSearches = exemplar.getRemoteSearches();
-        if(remoteSearches!=null){
-	        if(!exemplar.getRemoteSearches().isEmpty()){
+        if(remoteSearches != null){
+	        if(!remoteSearches.isEmpty() && remoteSearches.get(0) != null){
 	        	/* 
 	        	 * We need to know if the route begins in a local node of in a node in another server.
 	        	 * Depending on this value, the departure or destination node will be get from the
 	        	 * remote result.
 	        	 * */      	 
 	        	TripPlan remoteSearch = exemplar.getRemoteSearches().get(0); //REVISAR, PUEDEN SER 2 (UNO PARA TO Y OTRO PARA FROM)
-	        	if(!request.getDelegatedSearch()){
-	        		//The route has been generated in this server so the itinerary's origin is in local graph.
+	        	if(request.rctx.finalToVertex != null){
+	        		//The route has been generated in another server and the destination is in local graph.	        		
 	        		from = new Place(tripStartVertex.getX(),tripStartVertex.getY(), startName);
 	        		to = remoteSearch.to;
 	        		if (to.name == null) to.name = "Remote End Vertex";
 	        	} else {
-	        		//The route has been generated in another server and the destination is in local graph.
+	        		//The route has been generated in this server so the itinerary's origin is in local graph.
 	        		from = remoteSearch.from;
 	        		if (from.name == null) from.name = "Remote Start Vertex";
 	        		to = new Place(tripEndVertex.getX(),tripEndVertex.getY(), endName);
@@ -204,7 +208,7 @@ public class PlanGenerator {
             		String lat2=df.format(remoteVertex.getY());
             		String lon1=df.format(leg.from.lon);
             		String lon2=df.format(remoteVertex.getX());
-            		if (lat1.equals(lat2) && lon1.equals(lon2))
+            		//if (lat1.equals(lat2) && lon1.equals(lon2))
             			plan.addItinerary(itinerary);
             	} else {
             		Iterator<Leg> it = itinerary.legs.iterator();
@@ -216,7 +220,7 @@ public class PlanGenerator {
             		String lat2=df.format(remoteVertex.getY());
             		String lon1=df.format(leg.to.lon);
             		String lon2=df.format(remoteVertex.getX());
-            		if (lat1.equals(lat2) && lon1.equals(lon2))
+            		//if (lat1.equals(lat2) && lon1.equals(lon2))
             			plan.addItinerary(itinerary);
             	}
             }          
@@ -255,7 +259,7 @@ public class PlanGenerator {
         
         // If the remote search belogs to the start of the route, add its legs first
         if (ctx.getOriginServer() != null){
-        	itinerary = this.addRemoteLegs(path,itinerary);
+        	itinerary = this.addRemoteLegs(path,itinerary, true);
         }
 
         for (State state : path.states) {
@@ -544,7 +548,7 @@ public class PlanGenerator {
         
     	// Add legs in remote search, if exist
     	if (ctx.getFinalServer() != null){
-    		itinerary = this.addRemoteLegs(path,itinerary);
+    		itinerary = this.addRemoteLegs(path,itinerary, false);
     	}
         
         itinerary.removeBogusLegs();
@@ -639,11 +643,47 @@ public class PlanGenerator {
         return notes;
     }
     
-    private Itinerary addRemoteLegs(GraphPath path, Itinerary itinerary){
+    private Itinerary addRemoteLegs(GraphPath path, Itinerary itinerary, boolean remoteStart){
     	try{
 	    	TripPlan remotePlan = path.getRemoteSearches().get(0);
 	    	if (remotePlan!=null){
 		    	Itinerary remoteItinerary = remotePlan.itinerary.get(0); //remotePlans only return one path - itinerary
+		    	
+		    	//Adjust itinerary times
+		    	SimpleDateFormat df = DateUtils.dateFormat;
+		    	
+		    	if (!remoteStart)
+			    	/*for (Leg leg: itinerary.legs)
+			    	{
+						try {leg.startTime = df.format(new Date(df.parse(leg.startTime).getTime() + remoteItinerary.duration));} 
+			    		catch (ParseException e) {e.printStackTrace();}
+			    	
+						try {leg.endTime = df.format(new Date(df.parse(leg.endTime).getTime() + remoteItinerary.duration));} 
+						catch (ParseException e) {e.printStackTrace();}
+			    	}
+		    		try {
+		    			itinerary.startTime = df.format(new Date(df.parse(remoteItinerary.startTime).getTime() + remoteItinerary.duration + remoteItinerary.waitingTime + remoteItinerary.transitTime)); 
+		    			itinerary.endTime = df.format(new Date(df.parse(itinerary.startTime).getTime() + itinerary.duration + itinerary.waitingTime + itinerary.transitTime)); 
+		    		} catch (ParseException e) {e.printStackTrace();}
+		    	else*/
+		    		try {
+		    			
+		    			long elapsedTime = df.parse(itinerary.endTime).getTime() - df.parse(remoteItinerary.startTime).getTime();
+		    			
+				    	for (Leg leg: remoteItinerary.legs)
+				    	{
+							try {leg.startTime = df.format(new Date(df.parse(leg.startTime).getTime() + elapsedTime));}
+				    		catch (ParseException e) {e.printStackTrace();}
+				    	
+							try {leg.endTime = df.format(new Date(df.parse(leg.endTime).getTime() + elapsedTime));} 
+							catch (ParseException e) {e.printStackTrace();}
+				    	}
+				    	
+		    			remoteItinerary.startTime = itinerary.endTime;
+				    	remoteItinerary.endTime = remoteItinerary.legs.get(remoteItinerary.legs.size()-1).endTime; 		    			
+		    			
+		    		} catch (ParseException e) {e.printStackTrace();}
+    	
 		    	// Add to itinerary each leg in remoteItinerary
 		    	for (Leg leg: remoteItinerary.legs) {
 		    		itinerary.addLeg(leg);
@@ -662,24 +702,37 @@ public class PlanGenerator {
     	RoutingContext ctx = path.getRoutingContext();
     	List<TripPlan> remoteSearches = path.getRemoteSearches();
     	if (remoteSearches!=null){
-	    	if (!remoteSearches.isEmpty()){
+	    	if (!remoteSearches.isEmpty() && remoteSearches.get(0) != null){
 	    		TripPlan remotePath = path.getRemoteSearches().get(0);
 	    		Itinerary remoteItinerary = null;
-	    		try{
-	    		remoteItinerary = remotePath.itinerary.get(0);
-	    		} catch(NullPointerException e){
-	    			return itinerary;
-	    		}
-	    		itinerary.duration += remoteItinerary.duration;
+	    		try {remoteItinerary = remotePath.itinerary.get(0);} catch(NullPointerException e) {return itinerary;}
+	    		
+	    		//Adjust leg times
+		    	SimpleDateFormat df = DateUtils.dateFormat;
+		    	
+	    		if (ctx.getOriginServer() != null)
+	    			for (int i = remoteItinerary.legs.size(); i < itinerary.legs.size(); i++)
+			    	{
+	    				Leg leg = itinerary.legs.get(i);
+	    				
+						try {leg.startTime = df.format(new Date(df.parse(leg.startTime).getTime() + remoteItinerary.duration + remoteItinerary.waitingTime + remoteItinerary.transitTime));}
+			    		catch (ParseException e) {e.printStackTrace();}
+			    	
+						try {leg.endTime = df.format(new Date(df.parse(leg.endTime).getTime() + remoteItinerary.duration + remoteItinerary.waitingTime + remoteItinerary.transitTime));}
+						catch (ParseException e) {e.printStackTrace();}
+			    	}
+	    		
+	    		itinerary.startTime = ctx.getOriginServer() != null ? remoteItinerary.startTime : itinerary.startTime;
+	    		itinerary.endTime = ctx.getFinalServer() != null ? remoteItinerary.endTime : itinerary.legs.get(itinerary.legs.size()-1).endTime;
+	    		
+	    		try {itinerary.duration = df.parse(itinerary.endTime).getTime() - df.parse(itinerary.startTime).getTime();} 
+	    		catch (ParseException e) {e.printStackTrace();} //+= remoteItinerary.duration;
 	    		itinerary.transitTime += remoteItinerary.transitTime;
 	    		itinerary.waitingTime += remoteItinerary.waitingTime;
 	    		itinerary.walkDistance += remoteItinerary.walkDistance;
 	    		itinerary.elevationLost += remoteItinerary.elevationLost;
 	    		itinerary.elevationGained += remoteItinerary.elevationGained;
-	    		itinerary.transfers += remoteItinerary.transfers;
-	    		
-	    		itinerary.startTime = ctx.getOriginServer() != null ? remoteItinerary.startTime : itinerary.startTime;
-	    		itinerary.endTime = ctx.getFinalServer() != null ? remoteItinerary.endTime : itinerary.endTime;
+	    		itinerary.transfers += remoteItinerary.transfers + 1;
 	    	}
     	}
     	return itinerary;

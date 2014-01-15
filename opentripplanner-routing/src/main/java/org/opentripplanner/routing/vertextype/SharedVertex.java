@@ -96,6 +96,8 @@ public class SharedVertex extends TransitStop {
 		remoteRequest.setMaxWalkDistance(840.0);
 		remoteRequest.setModes(options.modes);
 		
+		remoteRequest.setNumItineraries(1);
+		
 		/*remoteRequest.setDateTime(DateFormat.format("MM/dd/yy", System.currentTimeMillis()).toString(), 
 				DateFormat.format("hh:mmaa", System.currentTimeMillis()).toString());*/
 	

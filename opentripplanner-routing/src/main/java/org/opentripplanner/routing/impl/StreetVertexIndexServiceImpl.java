@@ -249,7 +249,7 @@ public class StreetVertexIndexServiceImpl implements StreetVertexIndexService {
         // elsewhere options=null means no restrictions, find anything.
         // here we skip examining stops, as they are really only relevant when transit is being used
         if (options != null && options.getModes().isTransit()) {
-            for (Vertex v : getLocalTransitStops(coordinate, 1000)) {
+            for (Vertex v : getLocalTransitStops(coordinate, 100)) {
                 double d = distanceLibrary.distance(v.getCoordinate(), coordinate);
                 if (d < closestStopDistance) {
                     closestStopDistance = d;
